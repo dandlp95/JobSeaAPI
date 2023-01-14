@@ -9,10 +9,10 @@ namespace JobSeaAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int StatusId { get; set; }
         [Required]
-        public string currStatus { get; set; }
-        public string notes { get; set; }
+        public string CurrStatus { get; set; }
+        public string Notes { get; set; }
         [Required]
-        public DateTime created { get; set; }
+        public DateTime created { get; set; } = DateTime.Now;
         [Required]
         public int ApplicationId { get; set; }
         [ForeignKey("ApplicationId")]
