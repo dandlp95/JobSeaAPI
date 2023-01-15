@@ -26,6 +26,9 @@ namespace JobSeaAPI.Controllers
         }
 
         [HttpGet("GetUsers")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<APIResponse>> GetUsers()
         {
             try
@@ -45,7 +48,5 @@ namespace JobSeaAPI.Controllers
                 return _response;
             }
         }
-
-
     }
 }
