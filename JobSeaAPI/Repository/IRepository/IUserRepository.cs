@@ -1,6 +1,8 @@
-﻿namespace JobSeaAPI.Repository.IRepository
+﻿using JobSeaAPI.Models;
+
+namespace JobSeaAPI.Repository.IRepository
 {
-    public interface IUserRepository
+    public interface IUserRepository : IRepository<User>
     {
     }
 }

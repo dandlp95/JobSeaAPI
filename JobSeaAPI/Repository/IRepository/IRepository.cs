@@ -1,6 +1,13 @@
-﻿namespace JobSeaAPI.Repository.IRepository
+﻿using System.Linq.Expressions;
+
+namespace JobSeaAPI.Repository.IRepository
 {
-    public interface IUserRepository
+    public interface IRepository<T> where T : class
     {
+        Task CreateAsync(T entity);
+        Task DeleteAsync(T entity);
+        Task SaveAsync();
+        Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null);
+        Task<T> GetAsync(Expression<Func<T, bool>>? filter = null, bool tracked = true);
     }
 }
