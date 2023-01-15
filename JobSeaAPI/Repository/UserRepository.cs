@@ -5,8 +5,10 @@ using System.Linq.Expressions;
 
 namespace JobSeaAPI.Repository
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : Repository<User>, IUserRepository
     {
-
+        public UserRepository(ApplicationDbContext db) : base(db)
+        {
+        }
     }
 }

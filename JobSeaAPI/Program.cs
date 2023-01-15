@@ -1,4 +1,8 @@
+using JobSeaAPI;
 using JobSeaAPI.Database;
+using JobSeaAPI.Repository;
+using JobSeaAPI.Repository.IRepository;
+using JobSeaAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +10,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
 });
+builder.Services.AddSingleton<ILoggerCustom, LoggerCustom>();
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 // Add services to the container.
 
