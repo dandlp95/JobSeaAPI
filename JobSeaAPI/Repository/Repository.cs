@@ -26,7 +26,7 @@ namespace JobSeaAPI.Repository
         }
 
         public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
-        {   
+        {
             IQueryable<T> query = dbSet;
             if(filter != null)
             {
