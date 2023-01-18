@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JobSeaAPI.Models
 {
+    [Index(nameof(email), IsUnique = true)]
     public class User
     {
         [Key]
@@ -14,7 +16,6 @@ namespace JobSeaAPI.Models
         public string LName { get; set; }
         [Required]
         public string email { get; set; }
-        [Required]
         public DateTime CreatedDate { get; set; } = DateTime.Now; // Not sure if this would work...
     }
 }

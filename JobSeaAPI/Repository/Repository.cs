@@ -1,8 +1,11 @@
 ﻿using JobSeaAPI.Database;
+using JobSeaAPI.Exceptions;
 using JobSeaAPI.Repository.IRepository;
+using JobSeaAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace JobSeaAPI.Repository
 {
@@ -10,14 +13,28 @@ namespace JobSeaAPI.Repository
     {
         private readonly ApplicationDbContext _db;
         internal DbSet<T> dbSet;
-        public Repository(ApplicationDbContext db) {
+        private readonly ILoggerCustom _logger;
+        public Repository(ApplicationDbContext db, ILoggerCustom logger) {
             _db = db;
             dbSet = _db.Set<T>();
+            _logger = logger;
         }
         public async Task CreateAsync(T entity)
         {
-            await dbSet.AddAsync(entity);
-            await SaveAsync();
+            try
+            {
+                if(entity == null)
+                {
+                    throw new JobSeaException(HttpStatusCode.BadRequest, "User can't be null.");
+                }
+                await dbSet.AddAsync(entity);
+                await SaveAsync();
+            } catch (Exception ex)
+            {
+                _logger.Log(ex.ToString(), "Create Async Repo error: ");
+                //throw new JobSeaException(HttpStatusCode.Conflict, ex.Message);
+                throw new JobSeaException(HttpStatusCode.Conflict, "We entered the exception!");
+            }
         }
 
         public async Task DeleteAsync(T entity)

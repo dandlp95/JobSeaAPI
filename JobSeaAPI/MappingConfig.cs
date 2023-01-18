@@ -9,8 +9,9 @@ namespace JobSeaAPI
         public MappingConfig()
         {
             CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<User, UserCreateDTO>().ReverseMap();
             CreateMap<Application, ApplicationDTO>().ReverseMap();
-            CreateMap<Status, StatusDTO>().ReverseMap();
+            CreateMap<Status, StatusDTO>().ReverseMap();  
         }
 
     }

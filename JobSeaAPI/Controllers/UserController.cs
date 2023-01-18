@@ -6,12 +6,13 @@ using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Net;
 
 namespace JobSeaAPI.Controllers
 {
     [ApiController]
-    [Route("jobSea/user")]
+    [Route("jobSea/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -51,15 +52,15 @@ namespace JobSeaAPI.Controllers
             }
         }
         [HttpGet("GetUserById/{id}")]
+        [HttpGet("id", Name = "GetUserById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<APIResponse>> GetUserById(int id)
         {
-   
-                throw new JobSeaException(HttpStatusCode.InternalServerError, "Hello world");
-                throw new Exception();
+            try
+            {
                 if (id < 1)
                 {
                     _logger.Log("Id is invalid", "error");
@@ -74,22 +75,38 @@ namespace JobSeaAPI.Controllers
                 }
                 UserDTO userDTO = _mapper.Map<UserDTO>(fetchedUser);
                 return Ok(userDTO);
-     
+            }
+            catch(Exception ex) 
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex);
+            }
         }
-        //[HttpGet("GetUsers")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //public async Task<ActionResult<APIResponse>> GetUsers()
-        //{
-        //    try
-        //    {
-                
-        //    }catch(JobSeaException ex)
-        //    {
+        [HttpPost("AddUser")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> AddUser([FromBody] UserCreateDTO userCreateDTO)
+        {
+            try
+            {
+                User user = _mapper.Map<User>(userCreateDTO);
+                await _dbUser.CreateAsync(user);
 
-        //    }
-        //}
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                _response.Result= _mapper.Map<UserCreateDTO>(user);
+                _logger.Log("The Id: " + user.UserId, "");
+
+                return CreatedAtRoute(nameof(GetUserById), new { id = user.UserId }, _response);
+            }
+            catch(JobSeaException ex)
+            {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex);
+            }
+        }
     }
 }
