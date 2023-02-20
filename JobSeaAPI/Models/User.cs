@@ -11,11 +11,11 @@ namespace JobSeaAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
         [Required]
-        public string FName { get; set; }
-        [Required]
-        public string LName { get; set; }
+        public string Username { get; set; }
         [Required]
         public string email { get; set; }
+        [Required]
+        public string password { get; set; }    
         public DateTime CreatedDate { get; set; } = DateTime.Now; // Not sure if this would work...
     }
 }
