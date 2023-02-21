@@ -6,8 +6,11 @@ using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
 
 namespace JobSeaAPI.Controllers
 {
@@ -18,14 +21,18 @@ namespace JobSeaAPI.Controllers
         private readonly IMapper _mapper;
         private readonly IUserRepository _dbUser;
         private readonly ILoggerCustom _logger;
-        protected  APIResponse _response;
+        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
+        protected APIResponse _response;
 
-        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger)
+        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService)
         {
             _mapper = mapper;
             _dbUser = dbUser;
             _logger = logger;
             _response = new();
+            _configuration = configuration;
+            _tokenService= tokenService;
         }
 
         [HttpGet("GetUsers")]
@@ -48,7 +55,7 @@ namespace JobSeaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;
                 _response.Errors = new List<string>() { ex.ToString() };
-                return  _response;
+                return _response;
             }
         }
         [HttpGet("GetUserById/{id}")]
@@ -76,7 +83,7 @@ namespace JobSeaAPI.Controllers
                 UserDTO userDTO = _mapper.Map<UserDTO>(fetchedUser);
                 return Ok(userDTO);
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex);
             }
@@ -92,14 +99,14 @@ namespace JobSeaAPI.Controllers
                 User user = _mapper.Map<User>(userCreateDTO);
                 await _dbUser.CreateAsync(user);
 
-                _response.StatusCode = HttpStatusCode.OK;
+                _response.StatusCode = HttpStatusCode.Created;
                 _response.IsSuccess = true;
-                _response.Result= _mapper.Map<UserCreateDTO>(user);
+                _response.Result = _mapper.Map<UserDTO>(user);
                 _logger.Log("The Id: " + user.UserId, "");
 
                 return CreatedAtRoute(nameof(GetUserById), new { id = user.UserId }, _response);
             }
-            catch(JobSeaException ex)
+            catch (JobSeaException ex)
             {
                 return StatusCode((int)ex.StatusCode, ex.Message);
             }
@@ -107,6 +114,19 @@ namespace JobSeaAPI.Controllers
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex);
             }
+        }
+        [HttpPost("Login")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult> Login([FromBody] LoginUser userInfo)
+        {
+            UserDTO authenticatedUser = await _dbUser.Authenticate(userInfo.Username, userInfo.password);
+            if (authenticatedUser == null)
+            {
+                return Unauthorized();
+            }
+            string userToken = _tokenService.GetToken();
+            return Ok(userToken);
         }
     }
 }
