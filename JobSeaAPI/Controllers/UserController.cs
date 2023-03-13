@@ -5,6 +5,8 @@ using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,16 +25,18 @@ namespace JobSeaAPI.Controllers
         private readonly ILoggerCustom _logger;
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         protected APIResponse _response;
 
-        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService)
+        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService, IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
             _dbUser = dbUser;
             _logger = logger;
             _response = new();
             _configuration = configuration;
-            _tokenService= tokenService;
+            _tokenService = tokenService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("GetUsers")]
@@ -128,5 +132,23 @@ namespace JobSeaAPI.Controllers
             string userToken = _tokenService.GetToken();
             return Ok(userToken);
         }
+
+        //[HttpPost("Logout")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        //public async Task<ActionResult> Logout(IHttpContextAccessor _httpContextAccessor)
+
+        //{
+        //    // access_token is the default name of the token but can be changed to something else.
+
+        //    // 3 options:
+        //    // use refresh tokens
+        //    // or a list of blacklisted tokens
+        //    // or just remove it from the client
+        //    string userToken = await _httpContextAccessor.HttpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token");
+
+        //    return NoContent();
+        //}
+
     }
 }

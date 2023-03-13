@@ -9,10 +9,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 string secretKey = builder.Configuration.GetValue<string>("AppSettings:SecretKey");
 string ApiUrl = builder.Configuration.GetValue<string>("AppSettings:ApiUrl");
+string clientUrl = builder.Configuration.GetValue<string>("AppSettings:clientUrl");
 
 var TokenValidationParameters = new TokenValidationParameters
 {
@@ -21,6 +23,16 @@ var TokenValidationParameters = new TokenValidationParameters
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
     ClockSkew = TimeSpan.Zero
 };
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins().AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                      });
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
@@ -35,6 +47,8 @@ builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddAuthentication(
     options =>
     {
+        // Technically not necessary to add default schema as there is only 1
+        // authentication service registered.
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     }
     )
@@ -47,6 +61,7 @@ builder.Services.AddAuthorization(cfg =>
 {
     cfg.AddPolicy("User", policy => policy.RequireClaim("type", "User"));
 });
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -71,6 +86,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -79,6 +95,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+
+app.UseCors(MyAllowSpecificOrigins);
+// This is an alternative to do it without having to add a cors policy separately.
+//app.UseCors(x => x
+//            .SetIsOriginAllowed(origin => true)
+//            .AllowAnyMethod()
+//            .AllowAnyHeader()
+//            .AllowCredentials());
 
 app.UseAuthorization();
 
