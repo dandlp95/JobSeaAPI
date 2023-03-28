@@ -7,7 +7,9 @@ using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+// using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -129,26 +131,33 @@ namespace JobSeaAPI.Controllers
             {
                 return Unauthorized();
             }
-            string userToken = _tokenService.GetToken();
+            string userToken = _tokenService.GetToken(authenticatedUser);
             return Ok(userToken);
         }
 
-        //[HttpPost("Logout")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        //public async Task<ActionResult> Logout(IHttpContextAccessor _httpContextAccessor)
+        [HttpGet("Test")]
+        [Authorize(Policy = "User")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult Test()
+        {
+            var user = _httpContextAccessor.HttpContext.User;
+     
+            var emailClaim = user.FindFirstValue(ClaimTypes.Email);
+            var emailClaim2 = user.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+            var shit = user.Claims.FirstOrDefault(c => c.Type == "poop")?.Value;
+            if (emailClaim == null)
+            {
+                return BadRequest();
+            }
+              
 
-        //{
-        //    // access_token is the default name of the token but can be changed to something else.
 
-        //    // 3 options:
-        //    // use refresh tokens
-        //    // or a list of blacklisted tokens
-        //    // or just remove it from the client
-        //    string userToken = await _httpContextAccessor.HttpContext.GetTokenAsync(JwtBearerDefaults.AuthenticationScheme, "access_token");
+ 
+  //          _response.Result = userClaims;
+            return Ok();
 
-        //    return NoContent();
-        //}
+        }
+
 
     }
 }

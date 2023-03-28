@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using JobSeaAPI.Models.DTO;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -13,13 +14,15 @@ namespace JobSeaAPI.Services
             _configuration = configuration;
         }
 
-        public string GetToken()
+        public string GetToken(UserDTO userInfo)
         {
             var secretKey = _configuration["AppSettings:SecretKey"];
             var apiURL = _configuration["AppSettings:ApiUrl"];
             var Claims = new List<Claim>
             {
-                new Claim("type", "User")
+                new Claim("type", "User"),
+                new Claim(JwtRegisteredClaimNames.Email, userInfo.email),
+                new Claim("poop", "shit")
             };
             var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var Token = new JwtSecurityToken(
