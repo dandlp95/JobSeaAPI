@@ -1,9 +1,7 @@
-﻿using JobSeaAPI.Models.DTO;
-
-namespace JobSeaAPI.Services
+﻿namespace JobSeaAPI.Services
 {
     public interface ITokenService
     {
-        public string GetToken(UserDTO userInfo);
+        public string GetToken(string username);
     }
 }

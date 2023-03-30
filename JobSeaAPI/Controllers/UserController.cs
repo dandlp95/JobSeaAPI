@@ -5,16 +5,9 @@ using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 // using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
 
 namespace JobSeaAPI.Controllers
 {
@@ -108,7 +101,7 @@ namespace JobSeaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.Created;
                 _response.IsSuccess = true;
                 _response.Result = _mapper.Map<UserDTO>(user);
-                _logger.Log("The Id: " + user.UserId, "");
+                _response.Token = _tokenService.GetToken(user.Username);
 
                 return CreatedAtRoute(nameof(GetUserById), new { id = user.UserId }, _response);
             }
@@ -131,33 +124,8 @@ namespace JobSeaAPI.Controllers
             {
                 return Unauthorized();
             }
-            string userToken = _tokenService.GetToken(authenticatedUser);
+            string userToken = _tokenService.GetToken(userInfo.Username);
             return Ok(userToken);
         }
-
-        [HttpGet("Test")]
-        [Authorize(Policy = "User")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult Test()
-        {
-            var user = _httpContextAccessor.HttpContext.User;
-     
-            var emailClaim = user.FindFirstValue(ClaimTypes.Email);
-            var emailClaim2 = user.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
-            var shit = user.Claims.FirstOrDefault(c => c.Type == "poop")?.Value;
-            if (emailClaim == null)
-            {
-                return BadRequest();
-            }
-              
-
-
- 
-  //          _response.Result = userClaims;
-            return Ok();
-
-        }
-
-
     }
 }

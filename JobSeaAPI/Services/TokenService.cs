@@ -14,15 +14,14 @@ namespace JobSeaAPI.Services
             _configuration = configuration;
         }
 
-        public string GetToken(UserDTO userInfo)
+        public string GetToken(string username)
         {
             var secretKey = _configuration["AppSettings:SecretKey"];
             var apiURL = _configuration["AppSettings:ApiUrl"];
             var Claims = new List<Claim>
             {
                 new Claim("type", "User"),
-                new Claim(JwtRegisteredClaimNames.Email, userInfo.email),
-                new Claim("poop", "shit")
+                new Claim("username", username)
             };
             var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var Token = new JwtSecurityToken(
