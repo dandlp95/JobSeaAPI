@@ -18,7 +18,7 @@ namespace JobSeaAPI.Repository
             _mapper = mapper;
         }
 
-        public async Task<UserDTO> Authenticate(string username, string password)
+        public async Task<UserDTO?> Authenticate(string username, string password)
         {
             User foundUser = await GetAsync(user => user.Username == username);
             // Password will be hashed.

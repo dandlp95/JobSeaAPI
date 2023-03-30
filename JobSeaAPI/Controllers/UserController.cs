@@ -6,7 +6,6 @@ using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-// using Microsoft.IdentityModel.JsonWebTokens;
 using System.Net;
 
 namespace JobSeaAPI.Controllers
@@ -119,7 +118,9 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> Login([FromBody] LoginUser userInfo)
         {
-            UserDTO authenticatedUser = await _dbUser.Authenticate(userInfo.Username, userInfo.password);
+
+            var userInfo2 = userInfo;
+            UserDTO? authenticatedUser = await _dbUser.Authenticate(userInfo.Username, userInfo.password);
             if (authenticatedUser == null)
             {
                 return Unauthorized();
