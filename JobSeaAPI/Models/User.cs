@@ -16,6 +16,6 @@ namespace JobSeaAPI.Models
         public string email { get; set; }
         [Required]
         public string password { get; set; }    
-        public DateTime CreatedDate { get; set; } = DateTime.Now; // Not sure if this would work...
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JobSeaAPI.Models
@@ -9,10 +10,16 @@ namespace JobSeaAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ApplicationId { get; set; }
         [Required]
-        public string Company { get; set; }
+        public string Company { get; set; } 
         [Required]
-        public string JobTitle { get; set; }
-        public int Salary { get; set; }
+        public string JobTitle { get; set; } 
+        public int Salary { get; set; } 
+        public string Location { get; set; } 
+        public string Link { get; set; } 
+        public string Comments { get; set; } 
+        [Required]
+        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime LastUpdated { get; set; }
         [Required]
         public int UserId { get; set; }
         [ForeignKey("UserId")]
