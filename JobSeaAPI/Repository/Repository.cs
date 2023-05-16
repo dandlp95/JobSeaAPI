@@ -3,7 +3,6 @@ using JobSeaAPI.Exceptions;
 using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 
