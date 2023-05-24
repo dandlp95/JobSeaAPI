@@ -117,9 +117,8 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> Login([FromBody] LoginUser userInfo)
-        {
+        {     
 
-            var userInfo2 = userInfo;
             UserDTO? authenticatedUser = await _dbUser.Authenticate(userInfo.Username, userInfo.password);
             if (authenticatedUser == null)
             {

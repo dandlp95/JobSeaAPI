@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
-// This DTO is used for updates to the application or get any other data
-// from the client related to an Application entity
+// Mix between application and update dto, because an update also has to be created 
+// the first time as well.
 namespace JobSeaAPI.Models.DTO
 {
-    public class ApplicationDTO
+    public class CreateApplicationDTO
     {
+        [Required]
+        public int ApplicationId { get; set; }
         [Required]
         public string Company { get; set; }
         [Required]
@@ -17,5 +18,9 @@ namespace JobSeaAPI.Models.DTO
         public string Comments { get; set; }
         [Required]
         public string UserId { get; set; }
+        public DateTime EventDate { get; set; }
+        public string notes { get; set; }
+        public int StatusId { get; set; }
+
     }
 }
