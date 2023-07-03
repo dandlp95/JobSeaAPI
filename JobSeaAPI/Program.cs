@@ -41,6 +41,7 @@ builder.Services.AddSingleton<ILoggerCustom, LoggerCustom>();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddScoped<IJobApplicationsRepository, JobApplicationsRepository>();
 
 
 //// Add services to the container.

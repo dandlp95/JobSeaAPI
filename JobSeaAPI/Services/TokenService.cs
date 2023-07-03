@@ -22,6 +22,7 @@ namespace JobSeaAPI.Services
             {
                 new Claim("type", "User"),
                 new Claim("username", username)
+                // need to add new claim with userId instead of username
             };
             var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var Token = new JwtSecurityToken(

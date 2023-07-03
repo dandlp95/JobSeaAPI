@@ -4,6 +4,9 @@ using JobSeaAPI.Models;
 using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Update;
+using System.Linq.Expressions;
 
 namespace JobSeaAPI.Repository
 {
@@ -14,27 +17,34 @@ namespace JobSeaAPI.Repository
         public JobApplicationsRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper) : base(db, logger)
         {
             _db = db;
-            dbSet = db.Set<Application>();
             _mapper = mapper;
         }
 
         public async Task CreateApplication(CreateApplicationDTO applicationDTO, Update updateDTO)
         {   
-            // Stopping point
-            Application application = _mapper.Map<Application>(applicationDTO);
-            Update update = _mapper.Map<Update>(updateDTO);
-            await CreateAsync(application);
-            update.
+            throw new NotImplementedException();
         }
 
-        public Task DeleteApplication(Application application)
+
+
+        public void CreateApplication(Application application, Update update)
+        {
+            update.Application = application;
+
+            _db.Set<Application>().Add(application);
+            _db.Set<Update>().Add(update);
+        }
+
+        public Task DeleteApplication(Application application) 
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<Application>> GetAllApplications()
+        public List<Application> GetAllApplications(int userId)
         {
-            throw new NotImplementedException();
+            Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
+            List<Application> results = GetAllEntities(filter);
+            return results;
         }
 
         public Task<Application> GetApplication(string sqlQuery)

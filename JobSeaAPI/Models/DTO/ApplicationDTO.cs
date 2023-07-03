@@ -6,6 +6,7 @@ namespace JobSeaAPI.Models.DTO
 {
     public class ApplicationDTO
     {
+        public int ApplicationId { get; set; }
         [Required]
         public string Company { get; set; }
         [Required]

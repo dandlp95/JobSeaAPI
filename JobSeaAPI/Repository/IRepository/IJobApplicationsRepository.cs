@@ -3,12 +3,12 @@ using JobSeaAPI.Models.DTO;
 
 namespace JobSeaAPI.Repository.IRepository
 {
-    public interface IJobApplicationsRepository : IRepository<Application>
+    public interface IJobApplicationsRepository
     { 
-        Task CreateApplication(ApplicationDTO application, UpdateDTO update);
+        void CreateApplication(Application application, Update update);
         Task DeleteApplication(Application application);
         Task UpdateApplication(Application application);
         Task<Application> GetApplication(string sqlQuery);
-        Task<List<Application>> GetAllApplications();
+        List<Application> GetAllApplications(int userId);
     }
 }

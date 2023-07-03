@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using JobSeaAPI.Models;
+using JobSeaAPI.Models.DTO;
+using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -14,15 +17,18 @@ namespace JobSeaAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IJobApplicationsRepository _applicationsRepo;
         protected APIResponse _response;
         
-        public JobApplicationController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ITokenService tokenService)
+        public JobApplicationController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, 
+               IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository)
         {
             _mapper = mapper;
             _logger = logger;
             _configuration = configuration;
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
+            _applicationsRepo = applicationsRepository;
         }
 
         // Gets Applications for a specific user, based on specific criteria
@@ -34,11 +40,14 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-
+                int userId = 0; // Will replace this with the id I get from the jwt
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId);
+                _response.Result = applications;
+                return Ok(_response);
             }
             catch (Exception ex)
             {
-
+                return BadRequest(ex.Message);
             }
 
         }
