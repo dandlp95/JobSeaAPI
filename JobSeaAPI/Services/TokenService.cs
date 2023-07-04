@@ -14,15 +14,15 @@ namespace JobSeaAPI.Services
             _configuration = configuration;
         }
 
-        public string GetToken(string username)
+        public string GetToken(string username, int userId)
         {
             var secretKey = _configuration["AppSettings:SecretKey"];
             var apiURL = _configuration["AppSettings:ApiUrl"];
             var Claims = new List<Claim>
             {
                 new Claim("type", "User"),
-                new Claim("username", username)
-                // need to add new claim with userId instead of username
+                new Claim("username", username),
+                new Claim("userId", userId.ToString())
             };
             var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var Token = new JwtSecurityToken(

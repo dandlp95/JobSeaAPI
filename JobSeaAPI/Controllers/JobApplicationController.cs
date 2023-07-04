@@ -4,7 +4,10 @@ using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace JobSeaAPI.Controllers
 {
@@ -36,12 +39,30 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy="User")]
+
         public async Task<ActionResult<APIResponse>> GetApplications()
         {
             try
             {
-                int userId = 0; // Will replace this with the id I get from the jwt
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId);
+                Claim userIdClaim = User.FindFirst("userId");
+                List<Application> applications = new();
+
+                if (Int32.TryParse(userIdClaim?.Value, out int userId))
+                {
+                    applications = _applicationsRepo.GetAllApplications(userId);
+                }
+                else
+                {
+                    _response.IsSuccess = false;
+                    _response.Errors = new List<string>()
+                    {
+                        "User Id is not valid."
+                    };
+                    _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                    return BadRequest(_response);
+                }
+
                 _response.Result = applications;
                 return Ok(_response);
             }
