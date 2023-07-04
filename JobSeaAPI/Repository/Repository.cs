@@ -28,7 +28,7 @@ namespace JobSeaAPI.Repository
             dbSet = _db.Set<T>();
         }
         
-        public List<T> GetAllEntities(Expression<Func<T, bool>>? filter)
+        public List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null)
         {
             IQueryable<T> query = dbSet;
             if(filter != null)
@@ -48,12 +48,11 @@ namespace JobSeaAPI.Repository
             return query.FirstOrDefault();
         }
 
-        //public async Task<int> CreateEntity<E>(E newEntity) where E : class 
-        //{
-        //    _db.Set<E>().Add(newEntity);
-        //    await _db.SaveChangesAsync();
-        //    return newEntity.Id;
-        //}
+        public async Task CreateEntity<E>(E newEntity) where E : class
+        {
+            _db.Set<E>().Add(newEntity);
+            await _db.SaveChangesAsync();
+        }
     }
 }
 

@@ -18,16 +18,32 @@ namespace JobSeaAPI.Repository
             _mapper = mapper;
         }
 
-        public async Task<UserDTO?> Authenticate(string username, string password)
+        public User? Authenticate(string username, string password)
         {
-            User foundUser = await GetAsync(user => user.Username == username);
+            User foundUser = GetEntity(user => user.Username == username);
             // Password will be hashed.
             if (foundUser == null || foundUser.password != password)
             {
                 return null;
             }
-            UserDTO loggedinUser = _mapper.Map<UserDTO>(foundUser);
-            return loggedinUser;
+            return foundUser;
         }
+
+        public List<User> GetAllUsers()
+        {
+            List<User> users = GetAllEntities();
+            return users;
+        }
+
+        public User GetUser(int userId)
+        {
+            User user = GetEntity(user => user.UserId == userId);
+            return user;
+        }
+        public async void CreateUser(User user)
+        {
+            await CreateEntity(user);
+        }
+        
     }
 }

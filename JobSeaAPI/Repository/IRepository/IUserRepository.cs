@@ -3,8 +3,11 @@ using JobSeaAPI.Models.DTO;
 
 namespace JobSeaAPI.Repository.IRepository
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository
     {
-        Task<UserDTO?> Authenticate(string username, string password);
+        User? Authenticate(string username, string password);
+        List<User> GetAllUsers();
+        User GetUser(int userId);
+        void CreateUser(User user);
     }
 }

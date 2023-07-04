@@ -41,7 +41,7 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                IEnumerable<User> users = await _dbUser.GetAllAsync();
+                IEnumerable<User> users = _dbUser.GetAllUsers();
                 _response.Result = _mapper.Map<List<UserDTO>>(users);
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
@@ -73,7 +73,7 @@ namespace JobSeaAPI.Controllers
                     _response.IsSuccess = false;
                     return BadRequest(_response);
                 }
-                User fetchedUser = await _dbUser.GetAsync(u => u.UserId == id);
+                User fetchedUser = _dbUser.GetUser(id);
                 if (fetchedUser == null)
                 {
                     return NotFound(_response);
@@ -95,12 +95,12 @@ namespace JobSeaAPI.Controllers
             try
             {
                 User user = _mapper.Map<User>(userCreateDTO);
-                await _dbUser.CreateAsync(user);
+                _dbUser.CreateUser(user);
 
                 _response.StatusCode = HttpStatusCode.Created;
                 _response.IsSuccess = true;
                 _response.Result = _mapper.Map<UserDTO>(user);
-                _response.Token = _tokenService.GetToken(user.Username);
+                _response.Token = _tokenService.GetToken(user.Username, user.UserId);
 
                 return CreatedAtRoute(nameof(GetUserById), new { id = user.UserId }, _response);
             }
@@ -119,12 +119,12 @@ namespace JobSeaAPI.Controllers
         public async Task<ActionResult> Login([FromBody] LoginUser userInfo)
         {     
 
-            UserDTO? authenticatedUser = await _dbUser.Authenticate(userInfo.Username, userInfo.password);
+            User authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
             if (authenticatedUser == null)
             {
                 return Unauthorized();
             }
-            string userToken = _tokenService.GetToken(userInfo.Username);
+            string userToken = _tokenService.GetToken(authenticatedUser.Username, authenticatedUser.UserId);
             return Ok(userToken);
         }
     }
