@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobSeaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230220234124_AddPasswordColumn")]
-    partial class AddPasswordColumn
+    [Migration("20230706034345_firstMigration")]
+    partial class firstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,11 +33,29 @@ namespace JobSeaAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ApplicationId"));
 
+                    b.Property<string>("Comments")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Company")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -62,25 +80,73 @@ namespace JobSeaAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StatusId"));
 
-                    b.Property<int>("ApplicationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("CurrStatus")
+                    b.Property<string>("StatusName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("created")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("StatusId");
 
+                    b.ToTable("Status");
+
+                    b.HasData(
+                        new
+                        {
+                            StatusId = 1,
+                            StatusName = "Hired"
+                        },
+                        new
+                        {
+                            StatusId = 2,
+                            StatusName = "Rejected"
+                        },
+                        new
+                        {
+                            StatusId = 3,
+                            StatusName = "Interview Scheduled"
+                        },
+                        new
+                        {
+                            StatusId = 4,
+                            StatusName = "Applied"
+                        },
+                        new
+                        {
+                            StatusId = 5,
+                            StatusName = "Waiting"
+                        });
+                });
+
+            modelBuilder.Entity("JobSeaAPI.Models.Update", b =>
+                {
+                    b.Property<int>("UpdateId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UpdateId"));
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EventDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UpdateId");
+
                     b.HasIndex("ApplicationId");
 
-                    b.ToTable("Status");
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("Updates");
                 });
 
             modelBuilder.Entity("JobSeaAPI.Models.User", b =>
@@ -96,7 +162,7 @@ namespace JobSeaAPI.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("email")
                         .IsRequired()
@@ -107,6 +173,9 @@ namespace JobSeaAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.HasIndex("email")
                         .IsUnique();
@@ -125,7 +194,7 @@ namespace JobSeaAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("JobSeaAPI.Models.Status", b =>
+            modelBuilder.Entity("JobSeaAPI.Models.Update", b =>
                 {
                     b.HasOne("JobSeaAPI.Models.Application", "Application")
                         .WithMany()
@@ -133,7 +202,15 @@ namespace JobSeaAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("JobSeaAPI.Models.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Application");
+
+                    b.Navigation("Status");
                 });
 #pragma warning restore 612, 618
         }

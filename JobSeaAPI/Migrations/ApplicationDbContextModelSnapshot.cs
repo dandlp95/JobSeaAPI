@@ -159,7 +159,7 @@ namespace JobSeaAPI.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("email")
                         .IsRequired()
@@ -170,6 +170,9 @@ namespace JobSeaAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("Username")
+                        .IsUnique();
 
                     b.HasIndex("email")
                         .IsUnique();

@@ -8,6 +8,6 @@ namespace JobSeaAPI.Repository.IRepository
         User? Authenticate(string username, string password);
         List<User> GetAllUsers();
         User GetUser(int userId);
-        void CreateUser(User user);
+        Task CreateUser(User user);
     }
 }

@@ -50,8 +50,16 @@ namespace JobSeaAPI.Repository
 
         public async Task CreateEntity<E>(E newEntity) where E : class
         {
-            _db.Set<E>().Add(newEntity);
-            await _db.SaveChangesAsync();
+            try
+            {
+                _db.Set<E>().Add(newEntity);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                throw ex;
+            }
+            
         }
     }
 }

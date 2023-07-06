@@ -20,6 +20,9 @@ namespace JobSeaAPI.Database
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>();
+            modelBuilder.Entity<Application>();
+            modelBuilder.Entity<Update>();
             modelBuilder.Entity<Status>().HasData(
                 new Status { StatusId = 1,StatusName = "Hired" },
                 new Status { StatusId = 2, StatusName = "Rejected" },
@@ -27,7 +30,10 @@ namespace JobSeaAPI.Database
                 new Status { StatusId = 4, StatusName = "Applied"},
                 new Status { StatusId = 5, StatusName = "Waiting"}
                 );
+            
+
         }
+
     }
 }
 

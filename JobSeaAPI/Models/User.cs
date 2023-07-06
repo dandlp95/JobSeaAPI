@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace JobSeaAPI.Models
 {
     [Index(nameof(email), IsUnique = true)]
+    [Index(nameof(Username), IsUnique = true)]
     public class User
     {
         [Key]

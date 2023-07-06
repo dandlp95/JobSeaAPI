@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobSeaAPI.Database;
 using JobSeaAPI.Exceptions;
 using JobSeaAPI.Models;
 using JobSeaAPI.Models.DTO;
@@ -6,6 +7,8 @@ using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace JobSeaAPI.Controllers
@@ -20,10 +23,13 @@ namespace JobSeaAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ApplicationDbContext _db;
         protected APIResponse _response;
 
-        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService, IHttpContextAccessor httpContextAccessor)
+        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService, 
+               IHttpContextAccessor httpContextAccessor, ApplicationDbContext db)
         {
+            _db = db;
             _mapper = mapper;
             _dbUser = dbUser;
             _logger = logger;
@@ -94,38 +100,59 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                User user = _mapper.Map<User>(userCreateDTO);
-                _dbUser.CreateUser(user);
+
+                User? user = _mapper.Map<User>(userCreateDTO);
+                await _dbUser.CreateUser(user);
 
                 _response.StatusCode = HttpStatusCode.Created;
                 _response.IsSuccess = true;
-                _response.Result = _mapper.Map<UserDTO>(user);
+                UserDTO userInfoResponse = _mapper.Map<UserDTO>(user);
+                _response.Result = userInfoResponse;
                 _response.Token = _tokenService.GetToken(user.Username, user.UserId);
 
-                return CreatedAtRoute(nameof(GetUserById), new { id = user.UserId }, _response);
+                return Ok(_response);
             }
             catch (JobSeaException ex)
             {
                 return StatusCode((int)ex.StatusCode, ex.Message);
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex);
+                if (IsDuplicateEntryError(ex))
+                {
+                    _response.IsSuccess = false;
+                    _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.Errors = new List<string>() { ex.InnerException.ToString() };
+                    
+                    return BadRequest(_response);
+                }
+
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+
         [HttpPost("Login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult> Login([FromBody] LoginUser userInfo)
+        public ActionResult Login([FromBody] LoginUser userInfo)
         {     
 
-            User authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
+            User? authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
             if (authenticatedUser == null)
             {
                 return Unauthorized();
             }
             string userToken = _tokenService.GetToken(authenticatedUser.Username, authenticatedUser.UserId);
             return Ok(userToken);
+        }
+
+        private bool IsDuplicateEntryError(DbUpdateException ex)
+        {
+            // Check the specific exception type or error code based on your database provider
+            // For example, in SQL Server, a duplicate key violation error has an error code of 2601 or 2627
+            return ex.InnerException is SqlException sqlEx &&
+                (sqlEx.Number == 2601 || sqlEx.Number == 2627);
         }
     }
 }
