@@ -36,33 +36,37 @@ namespace JobSeaAPI.Controllers
         }
 
         // Gets Applications for a specific user, based on specific criteria
-        [HttpGet("GetAllApplications")]
+        [HttpGet("GetAllApplications/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy="User")]
 
-        public async Task<ActionResult<APIResponse>> GetApplications()
+        public async Task<ActionResult<APIResponse>> GetApplications(int userIdRequest)
         {
             try
             {
                 List<Application> applications = new();
-                int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"));
+                int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), userIdRequest);
 
-                if (userId < 0)
+                if (userId == 0)
                 {
                     _response.Result = null;
                     _response.Errors = new List<string>() { "Invalid user request." };
                     _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
                     _response.IsSuccess = false;
-                    return BadRequest();
+                    return BadRequest(_response);
                 }
-
+                else if (userId == -1)
+                {
+                    return Forbid("You do not have access to this user's information.");
+                }
                 applications = _applicationsRepo.GetAllApplications(userId);
                 _response.Result = applications;
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK; 
                 _response.IsSuccess = true;
+                return Ok(_response);
             }
 
             catch (Exception ex)

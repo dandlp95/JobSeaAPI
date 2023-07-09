@@ -37,13 +37,13 @@ namespace JobSeaAPI.Services
                 signingCredentials: new SigningCredentials(Key, SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(Token);
         }
-        public int ValidateUserIdToken(Claim userIdClaim)
+        public int ValidateUserIdToken(Claim userIdClaim, int userId)
         {
-            if(Int32.TryParse(userIdClaim?.Value, out int userId))
+            if(Int32.TryParse(userIdClaim?.Value, out int userIdClaimValue))
             {
+                if (userIdClaimValue != userId) return -1;
                 User user = _userRepository.GetUser(userId);
-                if (user is not null) return userId;
-                else return 0;
+                return user is not null ? 1 : 0;
             }
             return 0;
         }
