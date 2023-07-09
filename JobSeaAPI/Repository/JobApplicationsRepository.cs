@@ -56,5 +56,14 @@ namespace JobSeaAPI.Repository
         {
             throw new NotImplementedException();
         }
+        public List<Update> GetAllUpdates(int userId, int applicationId)
+        {
+            Expression<Func<Update, bool>> queryExpression = entity =>
+                entity.ApplicationId == applicationId &&
+                entity.Application.UserId == userId;
+
+            List<Update> updates = GetAllEntities(queryExpression);
+            return updates;
+        }
     }
 }

@@ -4,7 +4,7 @@
 // from the client related to an Application entity
 namespace JobSeaAPI.Models.DTO
 {
-    public class ApplicationDTO
+    public class ApplicationCreateDTO
     {
         public int ApplicationId { get; set; }
         [Required]

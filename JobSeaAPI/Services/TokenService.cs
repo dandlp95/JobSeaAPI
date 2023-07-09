@@ -1,4 +1,6 @@
-﻿using JobSeaAPI.Models.DTO;
+﻿using JobSeaAPI.Models;
+using JobSeaAPI.Models.DTO;
+using JobSeaAPI.Repository.IRepository;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -9,9 +11,11 @@ namespace JobSeaAPI.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-        public TokenService(IConfiguration configuration)
+        private readonly IUserRepository _userRepository;
+        public TokenService(IConfiguration configuration, IUserRepository userRepository)
         {
             _configuration = configuration;
+            _userRepository = userRepository;
         }
 
         public string GetToken(string username, int userId)
@@ -32,6 +36,16 @@ namespace JobSeaAPI.Services
                 expires: DateTime.Now.AddDays(15.0),
                 signingCredentials: new SigningCredentials(Key, SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(Token);
+        }
+        public int ValidateUserIdToken(Claim userIdClaim)
+        {
+            if(Int32.TryParse(userIdClaim?.Value, out int userId))
+            {
+                User user = _userRepository.GetUser(userId);
+                if (user is not null) return userId;
+                else return 0;
+            }
+            return 0;
         }
     }
 }

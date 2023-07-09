@@ -22,9 +22,9 @@ namespace JobSeaAPI.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IJobApplicationsRepository _applicationsRepo;
         protected APIResponse _response;
-        
+        private readonly IUserRepository _userRepository;
         public JobApplicationController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, 
-               IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository)
+               IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository, IUserRepository userRepository)
         {
             _mapper = mapper;
             _logger = logger;
@@ -32,6 +32,7 @@ namespace JobSeaAPI.Controllers
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;
+            _userRepository = userRepository;
         }
 
         // Gets Applications for a specific user, based on specific criteria
@@ -45,32 +46,50 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                Claim userIdClaim = User.FindFirst("userId");
                 List<Application> applications = new();
+                int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"));
 
-                if (Int32.TryParse(userIdClaim?.Value, out int userId))
+                if (userId < 0)
                 {
-                    applications = _applicationsRepo.GetAllApplications(userId);
-                }
-                else
-                {
-                    _response.IsSuccess = false;
-                    _response.Errors = new List<string>()
-                    {
-                        "User Id is not valid."
-                    };
+                    _response.Result = null;
+                    _response.Errors = new List<string>() { "Invalid user request." };
                     _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
-                    return BadRequest(_response);
+                    _response.IsSuccess = false;
+                    return BadRequest();
                 }
 
+                applications = _applicationsRepo.GetAllApplications(userId);
                 _response.Result = applications;
-                return Ok(_response);
+                _response.Errors = null;
+                _response.StatusCode = System.Net.HttpStatusCode.OK; 
+                _response.IsSuccess = true;
             }
+
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
 
+        }
+
+        [HttpGet("GetApplicationUpdates")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+        public async Task<IActionResult> GetUpdates()
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpPost("CreateApplication")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+        public async Task<IActionResult> CreateApplication()
+        {
+            throw new NotImplementedException();
         }
 
     }

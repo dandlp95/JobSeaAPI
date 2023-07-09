@@ -27,17 +27,17 @@ namespace JobSeaAPI.Repository
             _logger = logger;
             dbSet = _db.Set<T>();
         }
-        
-        public List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null)
+
+        public List<E> GetAllEntities<E>(Expression<Func<E, bool>>? filter) where E : class
         {
-            IQueryable<T> query = dbSet;
-            if(filter != null)
+            IQueryable<E> query = _db.Set<E>();
+            if (filter != null)
             {
                 query = query.Where(filter);
             }
             return query.ToList();
         }
-        
+
         public T? GetEntity(Expression<Func<T, bool>>? filter)
         {
             IQueryable<T> query = dbSet;
@@ -63,11 +63,3 @@ namespace JobSeaAPI.Repository
         }
     }
 }
-
-//IQueryable<T> query = dbSet;
-//if(filter != null)
-//{
-//    query = query.Where(filter);
-//}
-
-//return await query.ToListAsync();
