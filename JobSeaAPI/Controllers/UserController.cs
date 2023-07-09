@@ -100,7 +100,6 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-
                 User? user = _mapper.Map<User>(userCreateDTO);
                 await _dbUser.CreateUser(user);
 
@@ -112,22 +111,13 @@ namespace JobSeaAPI.Controllers
 
                 return Ok(_response);
             }
-            catch (JobSeaException ex)
-            {
-                return StatusCode((int)ex.StatusCode, ex.Message);
-            }
             catch (DbUpdateException ex)
             {
-                if (IsDuplicateEntryError(ex))
-                {
-                    _response.IsSuccess = false;
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.Errors = new List<string>() { ex.InnerException.ToString() };
+                _response.IsSuccess = false;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Errors = new List<string>() { ex.InnerException.ToString(), "Error updating database." };
                     
-                    return BadRequest(_response);
-                }
-
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+                 return BadRequest(_response);
             }
         }
 
@@ -135,22 +125,37 @@ namespace JobSeaAPI.Controllers
         [HttpPost("Login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult Login([FromBody] LoginUser userInfo)
-        {     
-
-            User? authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
-            if (authenticatedUser == null)
+        public ActionResult<APIResponse> Login([FromBody] LoginUser userInfo)
+        {
+            try
             {
-                return Unauthorized();
+                User? authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
+                if (authenticatedUser == null)
+                {
+                    return Unauthorized();
+                }
+                string userToken = _tokenService.GetToken(authenticatedUser.Username, authenticatedUser.UserId);
+                _response.IsSuccess = true;
+                _response.Token = userToken;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.Errors = null;
+
+                return Ok(_response);
+            } catch(DbUpdateException ex)
+            {
+                _response.IsSuccess = true;
+                _response.Token = null;
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Errors = new List<string>() { ex.InnerException.ToString(), "Error updating database." };
+
+                return Ok(_response);
             }
-            string userToken = _tokenService.GetToken(authenticatedUser.Username, authenticatedUser.UserId);
-            return Ok(userToken);
+
         }
 
         private bool IsDuplicateEntryError(DbUpdateException ex)
         {
-            // Check the specific exception type or error code based on your database provider
-            // For example, in SQL Server, a duplicate key violation error has an error code of 2601 or 2627
+            // May implement later.
             return ex.InnerException is SqlException sqlEx &&
                 (sqlEx.Number == 2601 || sqlEx.Number == 2627);
         }
