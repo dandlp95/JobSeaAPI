@@ -15,7 +15,7 @@ namespace JobSeaAPI.Repository
             _mapper = mapper;
         }
 
-        public User? Authenticate(string username, string password)
+        public UserDTO? Authenticate(string username, string password)
         {
             User? foundUser = GetEntity(user => user.Username == username);
             // Password will be hashed.
@@ -23,7 +23,8 @@ namespace JobSeaAPI.Repository
             {
                 return null;
             }
-            return foundUser;
+            UserDTO responseUser = _mapper.Map<UserDTO>(foundUser);
+            return responseUser;
         }
 
         public List<User> GetAllUsers()

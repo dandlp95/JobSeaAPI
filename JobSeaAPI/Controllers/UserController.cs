@@ -129,7 +129,7 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                User? authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
+                UserDTO? authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
                 if (authenticatedUser == null)
                 {
                     return Unauthorized();
@@ -139,6 +139,7 @@ namespace JobSeaAPI.Controllers
                 _response.Token = userToken;
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.Errors = null;
+                _response.Result = authenticatedUser;
 
                 return Ok(_response);
             } catch(DbUpdateException ex)

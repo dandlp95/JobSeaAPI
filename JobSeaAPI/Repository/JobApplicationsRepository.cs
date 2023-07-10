@@ -38,18 +38,28 @@ namespace JobSeaAPI.Repository
             ApplicationDTO applicationDTO = _mapper.Map<ApplicationDTO>(application);
             return applicationDTO;
         }
-
-        public Task DeleteApplication(Application application) 
+        public List<Update> GetAllUpdates(int userId, int applicationId)
         {
-            throw new NotImplementedException();
-        }
+            Expression<Func<Update, bool>> queryExpression = entity =>
+                entity.ApplicationId == applicationId &&
+                entity.Application.UserId == userId;
 
+            List<Update> updates = GetAllEntities(queryExpression);
+            return updates;
+        }
         public List<Application> GetAllApplications(int userId)
         {
             Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
             List<Application> results = GetAllEntities(filter);
             return results;
         }
+
+
+        public Task DeleteApplication(Application application) 
+        {
+            throw new NotImplementedException();
+        }
+
 
         public Task<Application> GetApplication(string sqlQuery)
         {
@@ -60,14 +70,6 @@ namespace JobSeaAPI.Repository
         {
             throw new NotImplementedException(); 
         }
-        public List<Update> GetAllUpdates(int userId, int applicationId)
-        {
-            Expression<Func<Update, bool>> queryExpression = entity =>
-                entity.ApplicationId == applicationId &&
-                entity.Application.UserId == userId;
 
-            List<Update> updates = GetAllEntities(queryExpression);
-            return updates;
-        }
     }
 }
