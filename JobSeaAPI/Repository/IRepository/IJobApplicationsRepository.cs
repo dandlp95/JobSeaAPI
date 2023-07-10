@@ -5,7 +5,7 @@ namespace JobSeaAPI.Repository.IRepository
 {
     public interface IJobApplicationsRepository
     {
-        Application CreateApplication(CreateApplicationDTO applicationDTO);
+        ApplicationDTO CreateApplication(CreateApplicationDTO applicationDTORequest);
         Task DeleteApplication(Application application);
         Task UpdateApplication(Application application);
         Task<Application> GetApplication(string sqlQuery);

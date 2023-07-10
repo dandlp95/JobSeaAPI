@@ -1,17 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JobSeaAPI.Models.DTO
 {
     public class UpdateCreateDTO
     {
-        public int UpdateId { get; set; }
         public DateTime EventDate { get; set; }
         public string notes { get; set; }
+        [Required(ErrorMessage = "Status Id is required")]
         public int StatusId { get; set; }
-        public int ApplicationId { get; set; }
-        [ForeignKey("StatusId")]
-        public Status Status { get; set; }
-        [ForeignKey("ApplicationId")]
-        public Application Application { get; set; }
+        // This will be manually checked in the create update controller instead of using a Require decorator.
+        public int ApplicationId { get; set; } 
     }
 }

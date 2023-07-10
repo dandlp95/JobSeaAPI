@@ -35,6 +35,7 @@ namespace JobSeaAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;
             _userRepository = userRepository;
+            _response = new ();
         }
 
         // Gets Applications for a specific user, based on specific criteria
@@ -42,7 +43,7 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [Authorize(Policy="User")]
+        [Authorize(Policy = "User")]
 
         public async Task<ActionResult<APIResponse>> GetApplications(int userIdRequest)
         {
@@ -116,7 +117,8 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), newApplication.UserId);
+                Claim userIdClaim = User.FindFirst("userId");
+                int userId = _tokenService.ValidateUserIdToken(userIdClaim, newApplication.UserId);
                 if (userId == 0)
                 {
                     _response.Result = null;
@@ -127,7 +129,7 @@ namespace JobSeaAPI.Controllers
                 }
                 else if (userId == -1)
                 {
-                    return Forbid("You do not have access to this user's information.");
+                    return Forbid();
                 }
                 _response.Result = _applicationsRepo.CreateApplication(newApplication);
                 _response.Errors = null;

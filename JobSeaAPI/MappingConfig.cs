@@ -13,6 +13,7 @@ namespace JobSeaAPI
             CreateMap<Update, UpdateDTO>().ReverseMap();
             CreateMap<Update, UpdateCreateDTO>().ReverseMap();
             CreateMap<Application, CreateApplicationDTO>().ReverseMap();
+            CreateMap<Application, ApplicationDTO>().ReverseMap();
         }
 
     }

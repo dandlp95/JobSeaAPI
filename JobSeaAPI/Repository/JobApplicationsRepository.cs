@@ -21,20 +21,22 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public Application CreateApplication(CreateApplicationDTO applicationDTO)
+        public ApplicationDTO CreateApplication(CreateApplicationDTO applicationDTORequest)
         {
-            Application application = _mapper.Map<Application>(applicationDTO);
+            Application application = _mapper.Map<Application>(applicationDTORequest);
             application.Created = DateTime.Now;
             application.LastUpdated = DateTime.Now;
 
-            Update update = _mapper.Map<Update>(applicationDTO.firstUpdate);
+            Update update = _mapper.Map<Update>(applicationDTORequest.firstUpdate);
             update.Created = DateTime.Now;
             update.Application = application;
 
             _db.Set<Application>().Add(application);
             _db.Set<Update>().Add(update);
+            _db.SaveChanges();
 
-            return application;
+            ApplicationDTO applicationDTO = _mapper.Map<ApplicationDTO>(application);
+            return applicationDTO;
         }
 
         public Task DeleteApplication(Application application) 
@@ -56,7 +58,7 @@ namespace JobSeaAPI.Repository
 
         public Task UpdateApplication(Application application)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); 
         }
         public List<Update> GetAllUpdates(int userId, int applicationId)
         {
