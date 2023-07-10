@@ -6,7 +6,9 @@ using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Net;
 using System.Security.Claims;
 
 namespace JobSeaAPI.Controllers
@@ -36,7 +38,7 @@ namespace JobSeaAPI.Controllers
         }
 
         // Gets Applications for a specific user, based on specific criteria
-        [HttpGet("GetAllApplications/{userId}")]
+        [HttpGet("GetAllApplications/{userIdRequest}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -46,22 +48,22 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                List<Application> applications = new();
+               
                 int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), userIdRequest);
 
                 if (userId == 0)
                 {
                     _response.Result = null;
-                    _response.Errors = new List<string>() { "Invalid user request." };
-                    _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                    _response.Errors = new List<string>() { "User not found." };
+                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
                     _response.IsSuccess = false;
-                    return BadRequest(_response);
+                    return NotFound(_response);
                 }
                 else if (userId == -1)
                 {
                     return Forbid("You do not have access to this user's information.");
                 }
-                applications = _applicationsRepo.GetAllApplications(userId);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId);
                 _response.Result = applications;
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK; 
@@ -76,14 +78,33 @@ namespace JobSeaAPI.Controllers
 
         }
 
-        [HttpGet("GetApplicationUpdates")]
+        [HttpGet("GetApplicationUpdates/{applicationId}/{userIdRequest}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<IActionResult> GetUpdates()
+        public async Task<ActionResult<APIResponse>> GetUpdates(int applicationId, int userIdRequest)
         {
-            throw new NotImplementedException();
+            int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), userIdRequest);
+            if(userId == 0)
+            {
+                _response.Result = null;
+                _response.Errors = new List<string>() { "User not found." };
+                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                _response.IsSuccess = false;
+                return NotFound(_response);
+            }
+            else if (userId == -1)
+            {
+                return Forbid("You do not have access to this user's information.");
+            }
+
+            List<Update> updates = _applicationsRepo.GetAllUpdates(userIdRequest, applicationId);
+            _response.Result = updates;
+            _response.Errors = null;
+            _response.StatusCode = System.Net.HttpStatusCode.OK;
+            _response.IsSuccess = true;
+            return Ok(_response);
         }
 
         [HttpPost("CreateApplication")]
@@ -91,9 +112,38 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<IActionResult> CreateApplication()
+        public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationDTO newApplication)
         {
-            throw new NotImplementedException();
+            try
+            {
+                int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), newApplication.UserId);
+                if (userId == 0)
+                {
+                    _response.Result = null;
+                    _response.Errors = new List<string>() { "User not found." };
+                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    return NotFound(_response);
+                }
+                else if (userId == -1)
+                {
+                    return Forbid("You do not have access to this user's information.");
+                }
+                _response.Result = _applicationsRepo.CreateApplication(newApplication);
+                _response.Errors = null;
+                _response.StatusCode = System.Net.HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (DbUpdateException ex)
+            {
+                _response.Result = null;
+                _response.Errors = new List<string>() { ex.InnerException.ToString(),"Error fulfilling this request." };
+                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                _response.IsSuccess = false;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+
         }
 
     }

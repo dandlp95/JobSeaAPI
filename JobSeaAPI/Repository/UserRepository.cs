@@ -28,7 +28,7 @@ namespace JobSeaAPI.Repository
 
         public List<User> GetAllUsers()
         {
-            List<User> users = GetAllEntities();
+            List<User> users = GetAllEntities<User>();
             return users;
         }
 

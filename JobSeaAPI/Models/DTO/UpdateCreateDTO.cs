@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
 namespace JobSeaAPI.Models.DTO
 {
-    public class UpdateDTO
+    public class UpdateCreateDTO
     {
         public int UpdateId { get; set; }
-        [Required]
-        public DateTime Created { get; set; }
         public DateTime EventDate { get; set; }
         public string notes { get; set; }
         public int StatusId { get; set; }

@@ -18,16 +18,20 @@ namespace JobSeaAPI.Services
             _userRepository = userRepository;
         }
 
-        public string GetToken(string username, int userId)
+        public string GetToken(string username, int userId, bool isAdmin = false)
         {
             var secretKey = _configuration["AppSettings:SecretKey"];
             var apiURL = _configuration["AppSettings:ApiUrl"];
             var Claims = new List<Claim>
             {
-                new Claim("type", "User"),
                 new Claim("username", username),
                 new Claim("userId", userId.ToString())
             };
+
+            // Adds the correct authorization type based on user role.
+            if (isAdmin) Claims.Add( new Claim("type", "admin"));
+            else Claims.Add(new Claim("type", "User"));
+
             var Key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var Token = new JwtSecurityToken(
                 apiURL,
@@ -41,11 +45,13 @@ namespace JobSeaAPI.Services
         {
             if(Int32.TryParse(userIdClaim?.Value, out int userIdClaimValue))
             {
+                // Add logic later to verify their user role.
                 if (userIdClaimValue != userId) return -1;
                 User user = _userRepository.GetUser(userId);
                 return user is not null ? 1 : 0;
             }
             return 0;
         }
+        
     }
 }

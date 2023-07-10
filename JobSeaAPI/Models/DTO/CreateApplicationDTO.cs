@@ -17,10 +17,8 @@ namespace JobSeaAPI.Models.DTO
         public string Link { get; set; }
         public string Comments { get; set; }
         [Required]
-        public string UserId { get; set; }
-        public DateTime EventDate { get; set; }
-        public string notes { get; set; }
-        public int StatusId { get; set; }
-
+        public UpdateCreateDTO firstUpdate { get; set; }
+        [Required]
+        public int UserId { get; set; }
     }
 }

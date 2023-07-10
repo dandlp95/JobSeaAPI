@@ -18,7 +18,7 @@ namespace JobSeaAPI.Models
         public string Link { get; set; } 
         public string Comments { get; set; } 
         [Required]
-        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Created { get; set; }
         public DateTime LastUpdated { get; set; }
         [Required]
         public int UserId { get; set; }

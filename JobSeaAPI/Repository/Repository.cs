@@ -28,17 +28,15 @@ namespace JobSeaAPI.Repository
             dbSet = _db.Set<T>();
         }
 
-        public List<E> GetAllEntities<E>(Expression<Func<E, bool>>? filter) where E : class
+        public List<E> GetAllEntities<E>(Expression<Func<E, bool>>? filter = null) where E : class
         {
             IQueryable<E> query = _db.Set<E>();
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
+            if (filter is not null) query = query.Where(filter);
+            
             return query.ToList();
         }
 
-        public T? GetEntity(Expression<Func<T, bool>>? filter)
+        public T GetEntity(Expression<Func<T, bool>>? filter)
         {
             IQueryable<T> query = dbSet;
             if(filter != null)

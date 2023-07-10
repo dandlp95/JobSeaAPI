@@ -20,19 +20,21 @@ namespace JobSeaAPI.Repository
             _mapper = mapper;
         }
 
-        public async Task CreateApplication(CreateApplicationDTO applicationDTO, Update updateDTO)
-        {   
-            throw new NotImplementedException();
-        }
 
-
-
-        public void CreateApplication(Application application, Update update)
+        public Application CreateApplication(CreateApplicationDTO applicationDTO)
         {
+            Application application = _mapper.Map<Application>(applicationDTO);
+            application.Created = DateTime.Now;
+            application.LastUpdated = DateTime.Now;
+
+            Update update = _mapper.Map<Update>(applicationDTO.firstUpdate);
+            update.Created = DateTime.Now;
             update.Application = application;
 
             _db.Set<Application>().Add(application);
             _db.Set<Update>().Add(update);
+
+            return application;
         }
 
         public Task DeleteApplication(Application application) 

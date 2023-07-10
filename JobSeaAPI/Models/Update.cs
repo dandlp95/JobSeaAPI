@@ -8,8 +8,7 @@ namespace JobSeaAPI.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UpdateId { get; set; }
-        [Required]
-        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Created { get; set; }
         public DateTime EventDate { get; set; }
         [Required]
         public string notes { get; set; }  

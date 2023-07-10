@@ -4,8 +4,8 @@ using JobSeaAPI.Models.DTO;
 namespace JobSeaAPI.Repository.IRepository
 {
     public interface IJobApplicationsRepository
-    { 
-        void CreateApplication(Application application, Update update);
+    {
+        Application CreateApplication(CreateApplicationDTO applicationDTO);
         Task DeleteApplication(Application application);
         Task UpdateApplication(Application application);
         Task<Application> GetApplication(string sqlQuery);

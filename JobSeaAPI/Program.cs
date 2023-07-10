@@ -61,6 +61,7 @@ builder.Services.AddAuthentication(
 builder.Services.AddAuthorization(cfg =>
 {
     cfg.AddPolicy("User", policy => policy.RequireClaim("type", "User"));
+    cfg.AddPolicy("Admin", policy => policy.RequireClaim("type", "Admin"));
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
