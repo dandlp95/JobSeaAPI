@@ -10,7 +10,7 @@ namespace JobSeaAPI.Models.DTO
         public DateTime Created { get; set; }
         public DateTime EventDate { get; set; }
         public string notes { get; set; }
-        public int StatusId { get; set; }
+        public Status Status { get; set; }
         public int ApplicationId { get; set; }
     }
 }

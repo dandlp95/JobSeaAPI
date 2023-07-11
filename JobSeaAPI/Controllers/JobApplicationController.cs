@@ -101,7 +101,8 @@ namespace JobSeaAPI.Controllers
             }
 
             List<Update> updates = _applicationsRepo.GetAllUpdates(userIdRequest, applicationId);
-            _response.Result = updates;
+            List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
+            _response.Result = updatesDTO;
             _response.Errors = null;
             _response.StatusCode = System.Net.HttpStatusCode.OK;
             _response.IsSuccess = true;

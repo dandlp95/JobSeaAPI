@@ -44,8 +44,10 @@ namespace JobSeaAPI.Repository
                 entity.ApplicationId == applicationId &&
                 entity.Application.UserId == userId;
 
-            List<Update> updates = GetAllEntities(queryExpression);
-            return updates;
+            IQueryable<Update> query = _db.Set<Update>();
+            query = query.Where(queryExpression).Include(u=>u.Status);
+
+            return query.ToList();
         }
         public List<Application> GetAllApplications(int userId)
         {
