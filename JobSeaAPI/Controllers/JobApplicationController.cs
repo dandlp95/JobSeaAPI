@@ -149,5 +149,30 @@ namespace JobSeaAPI.Controllers
 
         }
 
+        [HttpGet("GetStatusOptions")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> GetStatusOptions()
+        {
+            try
+            {
+                List<Status> statuses = _applicationsRepo.GetStatuses();
+                _response.IsSuccess = true;
+                _response.StatusCode = System.Net.HttpStatusCode.OK;
+                _response.Errors = null;
+                _response.Result = statuses;
+                return Ok(_response);
+            }
+            catch (DbUpdateException ex)
+            {
+                _response.IsSuccess = false;
+                _response.Errors = new List<string>() { ex.InnerException.ToString() };
+                _response.Result= null;
+                _response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
+        }
+
     }
 }

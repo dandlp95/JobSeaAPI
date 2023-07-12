@@ -11,5 +11,6 @@ namespace JobSeaAPI.Repository.IRepository
         Task<Application> GetApplication(string sqlQuery);
         List<Application> GetAllApplications(int userId);
         List<Update> GetAllUpdates(int userId, int applicationId);
+        public List<Status> GetStatuses();
     }
 }

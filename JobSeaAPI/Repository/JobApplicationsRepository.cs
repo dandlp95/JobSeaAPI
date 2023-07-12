@@ -49,6 +49,11 @@ namespace JobSeaAPI.Repository
 
             return query.ToList();
         }
+        public List<Status> GetStatuses()
+        {
+            List<Status> statuses = GetAllEntities<Status>();
+            return statuses;
+        }
         public List<Application> GetAllApplications(int userId)
         {
             Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
