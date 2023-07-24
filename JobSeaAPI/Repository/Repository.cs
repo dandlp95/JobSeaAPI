@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
 using System.Net;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 /*
@@ -28,9 +29,9 @@ namespace JobSeaAPI.Repository
             dbSet = _db.Set<T>();
         }
 
-        public List<E> GetAllEntities<E>(Expression<Func<E, bool>>? filter = null) where E : class
+        public List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null)
         {
-            IQueryable<E> query = _db.Set<E>();
+            IQueryable<T> query = dbSet;
             if (filter is not null) query = query.Where(filter);
             
             return query.ToList();
@@ -46,18 +47,32 @@ namespace JobSeaAPI.Repository
             return query.FirstOrDefault();
         }
 
-        public async Task CreateEntity<E>(E newEntity) where E : class
+        public async Task<T> CreateEntity(T newEntity)
         {
             try
             {
-                _db.Set<E>().Add(newEntity);
+                _db.Set<T>().Add(newEntity);
                 await _db.SaveChangesAsync();
+                return newEntity;
             }
             catch (DbUpdateException ex)
             {
                 throw ex;
             }
             
+        }
+        public bool DeleteEntities(List<T> entities)
+        {
+            try
+            {
+                dbSet.RemoveRange(entities);
+                _db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
     }
 }

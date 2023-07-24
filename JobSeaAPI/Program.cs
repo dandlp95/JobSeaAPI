@@ -42,6 +42,8 @@ builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddScoped<IJobApplicationsRepository, JobApplicationsRepository>();
+builder.Services.AddScoped<IUpdateRepository, UpdateRepository>();
+builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 
 
 //// Add services to the container.

@@ -23,10 +23,13 @@ namespace JobSeaAPI.Controllers
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IJobApplicationsRepository _applicationsRepo;
+        private readonly IStatusRepository _statusRepository;
         protected APIResponse _response;
         private readonly IUserRepository _userRepository;
+        private readonly IUpdateRepository _updateRepository;
         public JobApplicationController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, 
-               IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository, IUserRepository userRepository)
+               IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository, 
+               IStatusRepository statusRepository,IUserRepository userRepository, IUpdateRepository updateRepository)
         {
             _mapper = mapper;
             _logger = logger;
@@ -36,6 +39,8 @@ namespace JobSeaAPI.Controllers
             _applicationsRepo = applicationsRepository;
             _userRepository = userRepository;
             _response = new ();
+            _statusRepository = statusRepository;
+            _updateRepository = updateRepository;
         }
 
         // Gets Applications for a specific user, based on specific criteria
@@ -100,7 +105,7 @@ namespace JobSeaAPI.Controllers
                 return Forbid("You do not have access to this user's information.");
             }
 
-            List<Update> updates = _applicationsRepo.GetAllUpdates(userIdRequest, applicationId);
+            List<Update> updates = _updateRepository.GetUpdates(userIdRequest, applicationId);
             List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
             _response.Result = updatesDTO;
             _response.Errors = null;
@@ -132,7 +137,7 @@ namespace JobSeaAPI.Controllers
                 {
                     return Forbid();
                 }
-                _response.Result = _applicationsRepo.CreateApplication(newApplication);
+                _response.Result = await _applicationsRepo.CreateApplication(newApplication);
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
                 _response.IsSuccess = true;
@@ -157,7 +162,7 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                List<Status> statuses = _applicationsRepo.GetStatuses();
+                List<Status> statuses = _statusRepository.GetStatuses();
                 _response.IsSuccess = true;
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
                 _response.Errors = null;

@@ -14,45 +14,25 @@ namespace JobSeaAPI.Repository
     {
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
-        public JobApplicationsRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper) : base(db, logger)
+        private readonly IUpdateRepository _updateRepo;
+        public JobApplicationsRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper, IUpdateRepository updateRepo) : base(db, logger)
         {
             _db = db;
             _mapper = mapper;
+            _updateRepo = updateRepo;   
         }
 
 
-        public ApplicationDTO CreateApplication(CreateApplicationDTO applicationDTORequest)
+        public async Task<ApplicationDTO> CreateApplication(CreateApplicationDTO applicationDTORequest)
         {
             Application application = _mapper.Map<Application>(applicationDTORequest);
             application.Created = DateTime.Now;
             application.LastUpdated = DateTime.Now;
 
-            Update update = _mapper.Map<Update>(applicationDTORequest.firstUpdate);
-            update.Created = DateTime.Now;
-            update.Application = application;
-
-            _db.Set<Application>().Add(application);
-            _db.Set<Update>().Add(update);
-            _db.SaveChanges();
-
+            await CreateEntity(application);
+            await _updateRepo.CreateUpdate(applicationDTORequest.firstUpdate, application);
             ApplicationDTO applicationDTO = _mapper.Map<ApplicationDTO>(application);
             return applicationDTO;
-        }
-        public List<Update> GetAllUpdates(int userId, int applicationId)
-        {
-            Expression<Func<Update, bool>> queryExpression = entity =>
-                entity.ApplicationId == applicationId &&
-                entity.Application.UserId == userId;
-
-            IQueryable<Update> query = _db.Set<Update>();
-            query = query.Where(queryExpression).Include(u=>u.Status);
-
-            return query.ToList();
-        }
-        public List<Status> GetStatuses()
-        {
-            List<Status> statuses = GetAllEntities<Status>();
-            return statuses;
         }
         public List<Application> GetAllApplications(int userId)
         {
@@ -62,7 +42,7 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public Task DeleteApplication(Application application) 
+        public Task DeleteApplication(int applicationId) 
         {
             throw new NotImplementedException();
         }
