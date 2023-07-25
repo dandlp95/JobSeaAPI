@@ -130,7 +130,7 @@ namespace JobSeaAPI.Controllers
             try
             {
                 UserDTO? authenticatedUser = _dbUser.Authenticate(userInfo.Username, userInfo.password);
-                if (authenticatedUser == null)
+                if (authenticatedUser is null)
                 {
                     return Unauthorized();
                 }

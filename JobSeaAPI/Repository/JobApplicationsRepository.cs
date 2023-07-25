@@ -42,15 +42,33 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public Task DeleteApplication(int applicationId) 
+        public async Task<bool> DeleteApplication(int applicationId) 
         {
-            throw new NotImplementedException();
+            try
+            {
+                List<Update> updatesToDelete = await _db.Set<Update>().Where(u => u.ApplicationId == applicationId).ToListAsync();
+                await _updateRepo.DeleteUpdate(updatesToDelete);
+
+                Application application = await dbSet.Where(a => a.ApplicationId == applicationId).FirstOrDefaultAsync();
+                await DeleteEntity(application);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
 
         public Task<Application> GetApplication(string sqlQuery)
         {
             throw new NotImplementedException();
+        }
+        public Application GetApplication(int applicationId)
+        {
+            Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId;
+            Application application = GetEntity(filter);
+            return application;
         }
 
         public Task UpdateApplication(Application application)

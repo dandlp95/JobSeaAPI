@@ -61,15 +61,31 @@ namespace JobSeaAPI.Repository
             }
             
         }
-        public bool DeleteEntities(List<T> entities)
+        public async Task<bool> DeleteEntities(List<T> entities)
         {
             try
             {
                 dbSet.RemoveRange(entities);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        public async Task<bool> DeleteEntity(T entity)
+        {
+            try
+            {
+                if(entity is not null)
+                {
+                    dbSet.Remove(entity);
+                    await _db.SaveChangesAsync();
+                }
+                return true;
+            }
+            catch (DbUpdateException ex) 
             {
                 return false;
             }

@@ -5,6 +5,7 @@ using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -152,6 +153,52 @@ namespace JobSeaAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
 
+        }
+
+        [HttpDelete("DeleteApplication/{applicationId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+        public async Task<ActionResult<APIResponse>> DeleteApplication(int applicationId)
+        {
+            try
+            {
+                Claim userIdClaim = User.FindFirst("userId");
+                Application applicationToDelete = _applicationsRepo.GetApplication(applicationId);
+                int userId = _tokenService.ValidateUserIdToken(userIdClaim, applicationToDelete.UserId);
+
+                if (userId == 0)
+                {
+                    _response.Result = null;
+                    _response.Errors = new List<string>() { "User not found." };
+                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    return NotFound(_response);
+                }
+                else if (userId == -1)
+                {
+                    return Forbid();
+                }
+
+                bool result = await _applicationsRepo.DeleteApplication(applicationId);
+
+                if (result)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+            }
+            catch(DbUpdateException ex)
+            {
+                _response.IsSuccess = false;
+                _response.Errors = new List<string>() { ex.InnerException.ToString() };
+                _response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            }
         }
 
         [HttpGet("GetStatusOptions")]

@@ -40,9 +40,9 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public bool DeleteUpdate(List<Update> updates)
+        public async Task<bool> DeleteUpdate(List<Update> updates)
         {
-            bool operationResult = DeleteEntities(updates);
+            bool operationResult = await DeleteEntities(updates);
             return operationResult; 
         }
 
