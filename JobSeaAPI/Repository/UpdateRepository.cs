@@ -14,12 +14,12 @@ namespace JobSeaAPI.Repository
     {
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
-        DbSet<Update> dbSet;
+        DbSet<Update> _dbSet;
         public UpdateRepository(ApplicationDbContext db, IMapper mapper, ILoggerCustom logger):base(db, logger)
         {
             _db = db;
             _mapper = mapper;
-            DbSet<Update> dbSet = _db.Set<Update>();
+            _dbSet = _db.Set<Update>();
         }
 
         public async Task<Update> CreateUpdate(UpdateCreateDTO updateDTO, Application application)
@@ -52,7 +52,7 @@ namespace JobSeaAPI.Repository
                 entity.ApplicationId == applicationId &&
                 entity.Application.UserId == userId;
 
-            IQueryable<Update> query = dbSet;
+            IQueryable<Update> query = _dbSet;
             query = query.Where(queryExpression).Include(u => u.Status);
 
             return query.ToList();
