@@ -15,7 +15,7 @@ namespace JobSeaAPI.Repository
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
         DbSet<Update> _dbSet;
-        public UpdateRepository(ApplicationDbContext db, IMapper mapper, ILoggerCustom logger):base(db, logger)
+        public UpdateRepository(ApplicationDbContext db, IMapper mapper, ILoggerCustom logger) : base(db, logger)
         {
             _db = db;
             _mapper = mapper;
@@ -40,11 +40,28 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public async Task<bool> DeleteUpdate(List<Update> updates)
+        public async Task<bool> DeleteUpdate(Update update)
         {
-            bool operationResult = await DeleteEntities(updates);
+            bool operationResult = await DeleteEntity(update);
+
             return operationResult; 
         }
+        public async Task<bool> DeleteUpdate(int updateId)
+        {
+            Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateId;
+            Update update = GetEntity(expression);
+            bool operationResult = await DeleteEntity(update);
+
+            return operationResult;
+        }
+
+        public async Task<bool> DeleteUpdates(List<Update> updates)
+        {
+            bool operationResult = await DeleteEntities(updates);
+
+            return operationResult;
+        }
+
 
         public List<Update> GetUpdates(int userId, int applicationId)
         {
@@ -55,7 +72,13 @@ namespace JobSeaAPI.Repository
             IQueryable<Update> query = _dbSet;
             query = query.Where(queryExpression).Include(u => u.Status);
 
-            return query.ToList();
+            return query.ToList() ?? new List<Update>();
+        }
+        public Update GetUpdate(int updateId)
+        {
+            Expression<Func<Update,bool>> expression = entity => entity.UpdateId == updateId;
+            Update update = GetEntity(expression);
+            return update;
         }
     }
 }

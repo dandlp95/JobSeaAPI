@@ -47,7 +47,7 @@ namespace JobSeaAPI.Repository
             try
             {
                 List<Update> updatesToDelete = await _db.Set<Update>().Where(u => u.ApplicationId == applicationId).ToListAsync();
-                await _updateRepo.DeleteUpdate(updatesToDelete);
+                await _updateRepo.DeleteUpdates(updatesToDelete);
 
                 Application application = await dbSet.Where(a => a.ApplicationId == applicationId).FirstOrDefaultAsync();
                 await DeleteEntity(application);
