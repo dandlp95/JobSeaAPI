@@ -30,7 +30,7 @@ namespace JobSeaAPI.Repository
             await CreateEntity(update);
             return update;
         }
-        public async Task<Update> CreateUpdate(UpdateDTO updateDTO)
+        public async Task<Update> CreateUpdate(UpdateCreateDTO updateDTO)
         {
             Update update = _mapper.Map<Update>(updateDTO);
             update.Created = DateTime.Now;
@@ -77,6 +77,10 @@ namespace JobSeaAPI.Repository
             Expression<Func<Update,bool>> expression = entity => entity.UpdateId == updateId;
             Update update = GetEntity(expression);
             return update;
+        }
+        public async Task<Update> UpdateUpdate()
+        {
+            throw new NotImplementedException();
         }
     }
 }
