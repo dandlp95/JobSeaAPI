@@ -30,15 +30,13 @@ namespace JobSeaAPI.Repository
             await CreateEntity(update);
             return update;
         }
-        public async Task<Update> CreateUpdate(UpdateCreateDTO updateDTO, int applicationId)
+        public async Task<Update> CreateUpdate(UpdateDTO updateDTO)
         {
             Update update = _mapper.Map<Update>(updateDTO);
-            update.ApplicationId = applicationId;
             update.Created = DateTime.Now;
             await CreateEntity(update);
             return update;
         }
-
 
         public async Task<bool> DeleteUpdate(Update update)
         {

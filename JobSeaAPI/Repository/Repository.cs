@@ -37,7 +37,7 @@ namespace JobSeaAPI.Repository
             return query.ToList();
         }
 
-        public T GetEntity(Expression<Func<T, bool>>? filter)
+        public T? GetEntity(Expression<Func<T, bool>>? filter)
         {
             IQueryable<T> query = dbSet;
             if(filter != null)

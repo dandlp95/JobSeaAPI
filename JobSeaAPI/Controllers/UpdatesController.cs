@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using JobSeaAPI.Models;
+using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository;
 using JobSeaAPI.Repository.IRepository;
 using JobSeaAPI.Services;
@@ -41,6 +42,48 @@ namespace JobSeaAPI.Controllers
             _response = new();
             _statusRepository = statusRepository;
             _updateRepository = updateRepository;
+        }
+        [HttpPost("AddUpdate")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateDTO updateDTO)
+        {
+            Claim userIdClaim = User.FindFirst("userId");
+            Application application = _applicationsRepo.GetApplication(updateDTO.ApplicationId);
+            if(application is null)
+            {
+                _response.Result = null;
+                _response.Errors = new List<string>() { "Application Id doesn't match any current applications." };
+                _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+                _response.IsSuccess = false;
+                return BadRequest(_response);
+            }
+            int userId = _tokenService.ValidateUserIdToken(userIdClaim, application.UserId);
+
+            if (userId == 0)
+            {
+                _response.Result = null;
+                _response.Errors = new List<string>() { "User not found." };
+                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                _response.IsSuccess = false;
+                return NotFound(_response);
+            }
+            else if (userId == -1)
+            {
+                return Forbid();
+            }
+
+            Update newUpdate = await _updateRepository.CreateUpdate(updateDTO);
+            UpdateDTO newUpdateDTO = _mapper.Map<UpdateDTO>(newUpdate);
+            _response.Result = newUpdateDTO;
+            _response.Errors = new List<string>();
+            _response.StatusCode = System.Net.HttpStatusCode.Created;
+            _response.IsSuccess = true;
+
+            return StatusCode(StatusCodes.Status201Created, _response);
+
         }
 
         [HttpDelete("DeleteApplication/{applicationId}")]
