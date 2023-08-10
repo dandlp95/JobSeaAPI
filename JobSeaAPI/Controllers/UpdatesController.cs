@@ -48,7 +48,7 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateDTO updateDTO)
+        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO)
         {
             Claim userIdClaim = User.FindFirst("userId");
             Application application = _applicationsRepo.GetApplication(updateDTO.ApplicationId);
@@ -83,8 +83,45 @@ namespace JobSeaAPI.Controllers
             _response.IsSuccess = true;
 
             return StatusCode(StatusCodes.Status201Created, _response);
+        }
+
+        [HttpPut("UpdateUpdate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+        public async Task<ActionResult<APIResponse>> UpdateUpdate([FromBody] UpdateUpdateDTO updateDTO)
+        {
+            //Claim userIdClaim = User.FindFirst("userId");
+            //Application application = _applicationsRepo.GetApplication(updateDTO.ApplicationId);
+            //if (application is null)
+            //{
+            //    _response.Result = null;
+            //    _response.Errors = new List<string>() { "Application Id doesn't match any current applications." };
+            //    _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+            //    _response.IsSuccess = false;
+            //    return BadRequest(_response);
+            //}
+            //int userId = _tokenService.ValidateUserIdToken(userIdClaim, application.UserId);
+
+            //if (userId == 0)
+            //{
+            //    _response.Result = null;
+            //    _response.Errors = new List<string>() { "User not found." };
+            //    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
+            //    _response.IsSuccess = false;
+            //    return NotFound(_response);
+            //}
+            //else if (userId == -1)
+            //{
+            //    return Forbid();
+            //}
+            
+
+            throw new NotImplementedException();
 
         }
+
 
         [HttpDelete("DeleteApplication/{applicationId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -131,4 +168,6 @@ namespace JobSeaAPI.Controllers
         }
 
     }
+    // TO DO
+    // There is lots of repetitive code. Particularly having to do with auth, create a function to take care of it.
 }

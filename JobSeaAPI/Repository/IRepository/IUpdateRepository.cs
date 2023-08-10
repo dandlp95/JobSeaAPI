@@ -11,7 +11,8 @@ namespace JobSeaAPI.Repository.IRepository
         Task<bool> DeleteUpdates(List<Update> updates);
         List<Update> GetUpdates(int userId, int applicationId);
         public Task<Update> CreateUpdate(UpdateCreateDTO updateDTO, Application application);
-        public Task<Update> CreateUpdate(UpdateDTO updateDTO);
+        public Task<Update> CreateUpdate(UpdateCreateDTO updateDTO);
         public Update GetUpdate(int updateId);
+        public Task<Update> UpdateUpdate();
     }
 }
