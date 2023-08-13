@@ -78,8 +78,9 @@ namespace JobSeaAPI.Repository
             Update update = GetEntity(expression);
             return update;
         }
-        public async Task<Update> UpdateUpdate()
+        public async Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO)
         {
+
             throw new NotImplementedException();
         }
     }

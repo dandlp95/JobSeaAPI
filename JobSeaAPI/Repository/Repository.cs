@@ -90,5 +90,21 @@ namespace JobSeaAPI.Repository
                 return false;
             }
         }
+        public async Task<bool> UpdateEntity<K>(T entity, K entityDTO) where K : class , new() 
+        {
+            try
+            {
+                if(entity is not null)
+                {
+                    dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
+                    await _db.SaveChangesAsync();
+                }
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                return false;
+            }
+        }
     }
 }
