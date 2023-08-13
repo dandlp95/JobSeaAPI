@@ -49,17 +49,10 @@ namespace JobSeaAPI.Repository
 
         public async Task<T> CreateEntity(T newEntity)
         {
-            try
-            {
-                _db.Set<T>().Add(newEntity);
-                await _db.SaveChangesAsync();
-                return newEntity;
-            }
-            catch (DbUpdateException ex)
-            {
-                throw ex;
-            }
-            
+            _db.Set<T>().Add(newEntity);
+            await _db.SaveChangesAsync();
+            return newEntity;
+
         }
         public async Task<bool> DeleteEntities(List<T> entities)
         {
@@ -76,35 +69,23 @@ namespace JobSeaAPI.Repository
         }
         public async Task<bool> DeleteEntity(T entity)
         {
-            try
+            if(entity is not null)
             {
-                if(entity is not null)
-                {
-                    dbSet.Remove(entity);
-                    await _db.SaveChangesAsync();
-                }
+                dbSet.Remove(entity);
+                await _db.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex) 
-            {
-                return false;
-            }
+            return false;
         }
-        public async Task<bool> UpdateEntity<K>(T entity, K entityDTO) where K : class , new() 
+
+        public async Task<T> UpdateEntity<K>(T entity, K entityDTO) where K : class , new() 
         {
-            try
+            if(entity is not null)
             {
-                if(entity is not null)
-                {
-                    dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
-                    await _db.SaveChangesAsync();
-                }
-                return true;
+                dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
+                await _db.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
-            {
-                return false;
-            }
+            return entity;
         }
     }
 }

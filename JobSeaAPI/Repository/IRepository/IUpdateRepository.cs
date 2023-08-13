@@ -13,6 +13,6 @@ namespace JobSeaAPI.Repository.IRepository
         public Task<Update> CreateUpdate(UpdateCreateDTO updateDTO, Application application);
         public Task<Update> CreateUpdate(UpdateCreateDTO updateDTO);
         public Update GetUpdate(int updateId);
-        public Task<Update> UpdateUpdate();
+        public Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO);
     }
 }

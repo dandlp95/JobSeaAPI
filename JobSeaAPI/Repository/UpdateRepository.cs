@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using JobSeaAPI.Database;
+using JobSeaAPI.Exceptions;
 using JobSeaAPI.Models;
 using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
@@ -80,8 +81,10 @@ namespace JobSeaAPI.Repository
         }
         public async Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO)
         {
-
-            throw new NotImplementedException();
+            Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateDTO.UpdateId;
+            Update update = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "Update Id does not match any entity in the database.");
+            await UpdateEntity(update, updateDTO);
+            return update;
         }
     }
 }

@@ -7,9 +7,9 @@ namespace JobSeaAPI.Repository.IRepository
     {
         Task<ApplicationDTO> CreateApplication(CreateApplicationDTO applicationDTORequest);
         Task<bool> DeleteApplication(int applicationId);
-        Task UpdateApplication(Application application);
+        Task<Application> UpdateApplication(UpdateApplicationDTO application);
         Task<Application> GetApplication(string sqlQuery);
-        public Application GetApplication(int applicationId);
+        Application GetApplication(int applicationId);
         List<Application> GetAllApplications(int userId);
     }
 }

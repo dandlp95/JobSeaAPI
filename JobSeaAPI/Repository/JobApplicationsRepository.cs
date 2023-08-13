@@ -7,6 +7,7 @@ using JobSeaAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Update;
 using System.Linq.Expressions;
+using JobSeaAPI.Exceptions;
 
 namespace JobSeaAPI.Repository
 {
@@ -71,9 +72,11 @@ namespace JobSeaAPI.Repository
             return application;
         }
 
-        public Task UpdateApplication(Application application)
+        public async Task<Application> UpdateApplication(UpdateApplicationDTO applicationDTO)
         {
-            throw new NotImplementedException(); 
+            Application? application = GetEntity(e => e.ApplicationId == applicationDTO.ApplicationId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
+            await UpdateEntity(application, applicationDTO);
+            return application;
         }
 
     }
