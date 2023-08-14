@@ -50,7 +50,6 @@ namespace JobSeaAPI.Controllers
         [Authorize(Policy = "User")]
         public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO)
         {
-            Claim userIdClaim = User.FindFirst("userId");
             Application application = _applicationsRepo.GetApplication(updateDTO.ApplicationId);
             if(application is null)
             {
@@ -60,23 +59,13 @@ namespace JobSeaAPI.Controllers
                 _response.IsSuccess = false;
                 return BadRequest(_response);
             }
-            int userId = _tokenService.ValidateUserIdToken(userIdClaim, application.UserId);
 
-            if (userId == 0)
-            {
-                _response.Result = null;
-                _response.Errors = new List<string>() { "User not found." };
-                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                _response.IsSuccess = false;
-                return NotFound(_response);
-            }
-            else if (userId == -1)
-            {
-                return Forbid();
-            }
+            ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), application.UserId, _response);
+            if (actionResult is not null) return actionResult;
 
             Update newUpdate = await _updateRepository.CreateUpdate(updateDTO);
             UpdateDTO newUpdateDTO = _mapper.Map<UpdateDTO>(newUpdate);
+
             _response.Result = newUpdateDTO;
             _response.Errors = new List<string>();
             _response.StatusCode = System.Net.HttpStatusCode.Created;
@@ -130,30 +119,16 @@ namespace JobSeaAPI.Controllers
         [Authorize(Policy ="User")]
         public async Task<ActionResult<APIResponse>> DeleteUpdate(int updateId)
         {
-            Claim userIdClaim = User.FindFirst("userId");
             Update updateToDelete = _updateRepository.GetUpdate(updateId);
             int applicationId = updateToDelete.ApplicationId;
-
             Application application = _applicationsRepo.GetApplication(applicationId);
-            int userId = _tokenService.ValidateUserIdToken(userIdClaim, application.UserId);
 
-            if (userId == 0)
-            {
-                _response.Result = null;
-                _response.Errors = new List<string>() { "User not found." };
-                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                _response.IsSuccess = false;
-                return NotFound(_response);
-            }
-            else if (userId == -1)
-            {
-                return Forbid();
-            }
+            ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), application.UserId, _response);
+            if (actionResult is not null) return actionResult;
+
             await _updateRepository.DeleteUpdate(updateToDelete);
            return NoContent();
         }
 
     }
-    // TO DO
-    // There is lots of repetitive code. Particularly having to do with auth, create a function to take care of it.
 }

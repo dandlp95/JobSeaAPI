@@ -81,19 +81,8 @@ namespace JobSeaAPI.Controllers
         [Authorize(Policy = "User")]
         public async Task<ActionResult<APIResponse>> GetUpdates(int applicationId, int userIdRequest)
         {
-            int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), userIdRequest);
-            if(userId == 0)
-            {
-                _response.Result = null;
-                _response.Errors = new List<string>() { "User not found." };
-                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                _response.IsSuccess = false;
-                return NotFound(_response);
-            }
-            else if (userId == -1)
-            {
-                return Forbid("You do not have access to this user's information.");
-            }
+            ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userIdRequest, _response);
+            if (actionResult is not null) return actionResult;
 
             List<Update> updates = _updateRepository.GetUpdates(userIdRequest, applicationId);
             List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
@@ -113,20 +102,9 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-                Claim userIdClaim = User.FindFirst("userId");
-                int userId = _tokenService.ValidateUserIdToken(userIdClaim, newApplication.UserId);
-                if (userId == 0)
-                {
-                    _response.Result = null;
-                    _response.Errors = new List<string>() { "User not found." };
-                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                    _response.IsSuccess = false;
-                    return NotFound(_response);
-                }
-                else if (userId == -1)
-                {
-                    return Forbid();
-                }
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), newApplication.UserId, _response);
+                if (actionResult is not null) return actionResult;
+
                 _response.Result = await _applicationsRepo.CreateApplication(newApplication);
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
@@ -155,20 +133,9 @@ namespace JobSeaAPI.Controllers
             {
                 Claim userIdClaim = User.FindFirst("userId");
                 Application applicationToDelete = _applicationsRepo.GetApplication(applicationId);
-                int userId = _tokenService.ValidateUserIdToken(userIdClaim, applicationToDelete.UserId);
 
-                if (userId == 0)
-                {
-                    _response.Result = null;
-                    _response.Errors = new List<string>() { "User not found." };
-                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                    _response.IsSuccess = false;
-                    return NotFound(_response);
-                }
-                else if (userId == -1)
-                {
-                    return Forbid();
-                }
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, applicationToDelete.UserId, _response);
+                if (actionResult is not null) return actionResult;
 
                 await _applicationsRepo.DeleteApplication(applicationId);
                 return Ok();
