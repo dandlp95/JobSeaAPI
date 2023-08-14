@@ -1,6 +1,9 @@
-﻿using JobSeaAPI.Models;
+﻿using Azure;
+using JobSeaAPI.Models;
 using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
+using MagicVilla_VillaAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -52,6 +55,28 @@ namespace JobSeaAPI.Services
             }
             return 0;
         }
-        
+
+        public ActionResult? HandleValidateUserIdToken(int validateTokenResponse, APIResponse response)
+        {
+            if (validateTokenResponse == 0)
+            {
+                response.Result = null;
+                response.Errors = new List<string>() { "User not found." };
+                response.StatusCode = System.Net.HttpStatusCode.NotFound;
+                response.IsSuccess = false;
+                return new NotFoundObjectResult(response);
+            }
+            else if (validateTokenResponse == -1)
+            {
+                return new ForbidResult("Bearer");
+            }
+            return null;
+        }
+
+        public ActionResult tokenValidationResponseAction(Claim userIdClaim, int userId, APIResponse response)
+        {
+            int validateTokenResponse = ValidateUserIdToken(userIdClaim, userId);
+            return HandleValidateUserIdToken(validateTokenResponse, response);
+        }
     }
 }

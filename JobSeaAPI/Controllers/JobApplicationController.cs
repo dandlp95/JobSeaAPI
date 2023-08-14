@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 
 namespace JobSeaAPI.Controllers
@@ -55,22 +56,10 @@ namespace JobSeaAPI.Controllers
         {
             try
             {
-               
-                int userId = _tokenService.ValidateUserIdToken(User.FindFirst("userId"), userIdRequest);
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userIdRequest, _response);
+                if(actionResult is not null) return actionResult;
 
-                if (userId == 0)
-                {
-                    _response.Result = null;
-                    _response.Errors = new List<string>() { "User not found." };
-                    _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                    _response.IsSuccess = false;
-                    return NotFound(_response);
-                }
-                else if (userId == -1)
-                {
-                    return Forbid("You do not have access to this user's information.");
-                }
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userIdRequest);
                 _response.Result = applications;
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK; 
@@ -182,6 +171,7 @@ namespace JobSeaAPI.Controllers
                 }
 
                 await _applicationsRepo.DeleteApplication(applicationId);
+                return Ok();
             }
             catch(DbUpdateException ex)
             {

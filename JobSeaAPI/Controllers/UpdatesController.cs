@@ -150,7 +150,7 @@ namespace JobSeaAPI.Controllers
                 return Forbid();
             }
             await _updateRepository.DeleteUpdate(updateToDelete);
-           
+           return NoContent();
         }
 
     }
