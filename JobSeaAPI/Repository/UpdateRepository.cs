@@ -39,26 +39,20 @@ namespace JobSeaAPI.Repository
             return update;
         }
 
-        public async Task<bool> DeleteUpdate(Update update)
+        public async Task DeleteUpdate(Update update)
         {
-            bool operationResult = await DeleteEntity(update);
-
-            return operationResult; 
+            await DeleteEntity(update);
         }
-        public async Task<bool> DeleteUpdate(int updateId)
+        public async Task DeleteUpdate(int updateId)
         {
             Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateId;
             Update update = GetEntity(expression);
-            bool operationResult = await DeleteEntity(update);
-
-            return operationResult;
+            await DeleteEntity(update);
         }
 
-        public async Task<bool> DeleteUpdates(List<Update> updates)
+        public async Task DeleteUpdates(List<Update> updates)
         {
-            bool operationResult = await DeleteEntities(updates);
-
-            return operationResult;
+           await DeleteEntities(updates);
         }
 
 

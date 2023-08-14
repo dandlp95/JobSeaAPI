@@ -149,22 +149,8 @@ namespace JobSeaAPI.Controllers
             {
                 return Forbid();
             }
-            bool result = await _updateRepository.DeleteUpdate(updateToDelete);
-            
-            if(result)
-            {
-                int updatesCount = _updateRepository.GetUpdates(userId, applicationId).Count();
-                if (updatesCount == 0) 
-                { 
-                    await _applicationsRepo.DeleteApplication(applicationId);
-                }
-                return NoContent();
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
+            await _updateRepository.DeleteUpdate(updateToDelete);
+           
         }
 
     }

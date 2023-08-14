@@ -6,13 +6,13 @@ namespace JobSeaAPI.Repository.IRepository
 {
     public interface IUpdateRepository
     {
-        Task<bool> DeleteUpdate(Update update);
-        Task<bool> DeleteUpdate(int updateId);
-        Task<bool> DeleteUpdates(List<Update> updates);
+        Task DeleteUpdate(Update update);
+        Task DeleteUpdate(int updateId);
+        Task DeleteUpdates(List<Update> updates);
         List<Update> GetUpdates(int userId, int applicationId);
-        public Task<Update> CreateUpdate(UpdateCreateDTO updateDTO, Application application);
-        public Task<Update> CreateUpdate(UpdateCreateDTO updateDTO);
-        public Update GetUpdate(int updateId);
-        public Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO);
+        Task<Update> CreateUpdate(UpdateCreateDTO updateDTO, Application application);
+        Task<Update> CreateUpdate(UpdateCreateDTO updateDTO);
+        Update GetUpdate(int updateId);
+        Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO);
     }
 }

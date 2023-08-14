@@ -43,21 +43,13 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public async Task<bool> DeleteApplication(int applicationId) 
+        public async Task DeleteApplication(int applicationId) 
         {
-            try
-            {
                 List<Update> updatesToDelete = await _db.Set<Update>().Where(u => u.ApplicationId == applicationId).ToListAsync();
                 await _updateRepo.DeleteUpdates(updatesToDelete);
 
                 Application application = await dbSet.Where(a => a.ApplicationId == applicationId).FirstOrDefaultAsync();
                 await DeleteEntity(application);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
         }
 
 

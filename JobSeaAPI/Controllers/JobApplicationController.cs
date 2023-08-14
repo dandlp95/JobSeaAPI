@@ -181,16 +181,7 @@ namespace JobSeaAPI.Controllers
                     return Forbid();
                 }
 
-                bool result = await _applicationsRepo.DeleteApplication(applicationId);
-
-                if (result)
-                {
-                    return NoContent();
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
+                await _applicationsRepo.DeleteApplication(applicationId);
             }
             catch(DbUpdateException ex)
             {
