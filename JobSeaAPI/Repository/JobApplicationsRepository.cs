@@ -60,32 +60,25 @@ namespace JobSeaAPI.Repository
         public Application GetApplication(int applicationId)
         {
             Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId;
-            Application application = GetEntity(filter);
+            Application? application = GetEntity(filter);
             return application;
         }
 
-        public async Task<Application> UpdateApplication(UpdateApplicationDTO applicationDTO, bool updateAllFields = false)
+        public async Task<Application> UpdateApplication(UpdateApplicationDTO applicationDTO, int applicationId, bool updateAllFields = false)
         {
+            Application? application = GetEntity(e => e.ApplicationId == applicationId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
+            application.LastUpdated = DateTime.Now;
+
             if (updateAllFields is false) 
             {
-                Application? application = GetEntity(e => e.ApplicationId == applicationDTO.ApplicationId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
                 await UpdateEntity(application, applicationDTO);
                 return application;
             }
             else
             {
-
-            }
-
-        }
-        public async Task<Application> UpdateApplication(int applicationId, bool updateAllFields = false)
-        {
-            if(updateAllFields is false) 
-            {
-                Application? application = GetEntity(entity => entity.ApplicationId == applicationId);
-
+                await UpdateEntity(application, applicationDTO, true);
+                return application;
             }
         }
-
     }
 }

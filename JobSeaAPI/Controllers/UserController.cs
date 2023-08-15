@@ -39,7 +39,7 @@ namespace JobSeaAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpGet("GetUsers")]
+        [HttpGet("Users")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -62,7 +62,7 @@ namespace JobSeaAPI.Controllers
                 return _response;
             }
         }
-        [HttpGet("GetUserById/{id}")]
+        [HttpGet("Users/{id}")]
         [HttpGet("id", Name = "GetUserById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,7 +92,7 @@ namespace JobSeaAPI.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex);
             }
         }
-        [HttpPost("AddUser")]
+        [HttpPost("User")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

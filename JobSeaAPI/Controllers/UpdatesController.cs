@@ -43,7 +43,7 @@ namespace JobSeaAPI.Controllers
             _statusRepository = statusRepository;
             _updateRepository = updateRepository;
         }
-        [HttpPost("AddUpdate")]
+        [HttpPost("Update")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -74,7 +74,7 @@ namespace JobSeaAPI.Controllers
             return StatusCode(StatusCodes.Status201Created, _response);
         }
 
-        [HttpPut("UpdateUpdate")]
+        [HttpPut("Updates/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -106,13 +106,12 @@ namespace JobSeaAPI.Controllers
             //    return Forbid();
             //}
             
-
             throw new NotImplementedException();
 
         }
 
 
-        [HttpDelete("DeleteApplication/{applicationId}")]
+        [HttpDelete("DeleteUpdate/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

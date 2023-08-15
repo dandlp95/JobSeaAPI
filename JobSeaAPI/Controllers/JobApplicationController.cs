@@ -46,7 +46,7 @@ namespace JobSeaAPI.Controllers
         }
 
         // Gets Applications for a specific user, based on specific criteria
-        [HttpGet("GetAllApplications/{userIdRequest}")]
+        [HttpGet("user/{userIdRequest}/applications")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -73,8 +73,8 @@ namespace JobSeaAPI.Controllers
             }
 
         }
-
-        [HttpGet("GetApplicationUpdates/{applicationId}/{userIdRequest}")]
+        // ApplicationUpdates/{applicationId}/{userIdRequest}
+        [HttpGet("user/{userIdRequest}/Application/{applicationId}/Updates")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -93,7 +93,7 @@ namespace JobSeaAPI.Controllers
             return Ok(_response);
         }
 
-        [HttpPost("CreateApplication")]
+        [HttpPost("Application")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -122,7 +122,7 @@ namespace JobSeaAPI.Controllers
 
         }
 
-        [HttpDelete("DeleteApplication/{applicationId}")]
+        [HttpDelete("Application/{applicationId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -149,7 +149,7 @@ namespace JobSeaAPI.Controllers
             }
         }
 
-        [HttpGet("GetStatusOptions")]
+        [HttpGet("StatusOptions")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -174,20 +174,31 @@ namespace JobSeaAPI.Controllers
             }
         }
 
-        [HttpPut("UpdateJobApplication/{applicationId}")]
+        [HttpPut("Applications/{applicationId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> UpdateJobApplication(int applicationId)
+        public async Task<ActionResult<APIResponse>> UpdateJobApplication(int applicationId, [FromBody] UpdateApplicationDTO applicationDTO)
         {
             try
             {
-                Application application = await _applicationsRepo.UpdateApplication()
+                Application application = await _applicationsRepo.UpdateApplication(applicationDTO, applicationId);
+                ApplicationDTO updatedApplication = _mapper.Map<ApplicationDTO>(application);
+
+                _response.IsSuccess = true;
+                _response.StatusCode = System.Net.HttpStatusCode.OK;
+                _response.Errors = null;
+                _response.Result = updatedApplication;
+                return Ok(_response);
             }
             catch (DbUpdateException ex)
             {
-
+                _response.IsSuccess = false;
+                _response.Errors = new List<string>() { ex.InnerException.ToString() };
+                _response.Result = null;
+                _response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+                return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
         }
     }
