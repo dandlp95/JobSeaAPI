@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -70,12 +71,35 @@ namespace JobSeaAPI.Repository
             return false;
         }
 
-        public async Task<T> UpdateEntity<K>(T entity, K entityDTO) where K : class , new() 
-        {
-            if(entity is not null)
+        public async Task<T> UpdateEntity<K>(T entity, K entityDTO, bool updateAllFields = false) where K : class , new() 
+        {   
+            if (updateAllFields is true)
             {
-                dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
-                await _db.SaveChangesAsync();
+                if (entity is not null)
+                {
+                    dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
+                    await _db.SaveChangesAsync();
+                }
+                return entity;
+            } 
+            else
+            {
+                Type entityDTOType = typeof(K);
+                Type entityType = typeof(T);
+
+                PropertyInfo[] dtoProperties = entityDTOType.GetProperties();
+
+                foreach(PropertyInfo dtoProperty in dtoProperties)
+                {
+                    object? dtoValue = dtoProperty.GetValue(entityDTO);
+
+                    if(dtoValue is not null)
+                    {
+                        PropertyInfo? entityProperty = entityType.GetProperty(dtoProperty.Name);
+
+                        entityProperty?.SetValue(entity, dtoValue);
+                    }
+                }
             }
             return entity;
         }

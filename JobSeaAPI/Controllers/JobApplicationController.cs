@@ -174,5 +174,21 @@ namespace JobSeaAPI.Controllers
             }
         }
 
+        [HttpPut("UpdateJobApplication/{applicationId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> UpdateJobApplication(int applicationId)
+        {
+            try
+            {
+                Application application = await _applicationsRepo.UpdateApplication()
+            }
+            catch (DbUpdateException ex)
+            {
+
+            }
+        }
     }
 }

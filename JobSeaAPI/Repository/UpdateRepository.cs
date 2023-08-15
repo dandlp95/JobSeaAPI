@@ -80,5 +80,6 @@ namespace JobSeaAPI.Repository
             await UpdateEntity(update, updateDTO);
             return update;
         }
+
     }
 }
