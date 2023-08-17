@@ -10,5 +10,6 @@ namespace JobSeaAPI.Repository.IRepository
         User GetUser(int userId);
         Task CreateUser(User user);
         Task<User> UpdateUser(UpdateUserDTO userDTO);
+        Task DeleteUser(int userId);
     }
 }

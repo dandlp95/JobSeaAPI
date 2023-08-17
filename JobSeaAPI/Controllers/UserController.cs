@@ -92,6 +92,7 @@ namespace JobSeaAPI.Controllers
                 return StatusCode((int)HttpStatusCode.InternalServerError, ex);
             }
         }
+
         [HttpPost("User")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -151,8 +152,26 @@ namespace JobSeaAPI.Controllers
 
                 return Ok(_response);
             }
-
         }
+
+        [HttpDelete("Users/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> DeleteUser(int userId)
+        {
+            try
+            {
+                await _dbUser.DeleteUser(userId);
+                return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         private bool IsDuplicateEntryError(DbUpdateException ex)
         {
