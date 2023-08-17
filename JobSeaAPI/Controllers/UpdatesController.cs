@@ -30,11 +30,10 @@ namespace JobSeaAPI.Controllers
         private readonly IJobApplicationsRepository _applicationsRepo;
         private readonly IStatusRepository _statusRepository;
         protected APIResponse _response;
-        private readonly IUserRepository _userRepository;
         private readonly IUpdateRepository _updateRepository;
 
         public UpdatesController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ITokenService tokenService, 
-            IJobApplicationsRepository applicationsRepository,IStatusRepository statusRepository, IUserRepository userRepository, IUpdateRepository updateRepository)
+            IJobApplicationsRepository applicationsRepository,IStatusRepository statusRepository, IUpdateRepository updateRepository)
         {
             _mapper = mapper;
             _logger = logger;
@@ -42,19 +41,19 @@ namespace JobSeaAPI.Controllers
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;
-            _userRepository = userRepository;
             _response = new();
             _statusRepository = statusRepository;
             _updateRepository = updateRepository;
         }
-        [HttpPost("Update")]
+        [HttpPost("Application/{ApplicationId}/Update")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO)
+        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO, int applicationId)
         {
-            Application application = _applicationsRepo.GetApplication(updateDTO.ApplicationId);
+
+            Application application = _applicationsRepo.GetApplication(applicationId);
             if(application is null)
             {
                 _response.Result = null;
@@ -140,8 +139,8 @@ namespace JobSeaAPI.Controllers
 
         private int getUpdateUserId(int updateId)
         {
-            Update? update = _updateRepository.GetUpdate(updateId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "Update Id does not match any entity in the database.");
-            Application? application = _applicationsRepo.GetApplication(update.ApplicationId);
+            Update? update = _updateRepository.GetUpdate(updateId) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "Update Id does not match any entity in the database.");
+            Application? application = _applicationsRepo.GetApplication(update.ApplicationId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "Update ApplicationId is invalid."); ; 
             return application.UserId;
         }
     }

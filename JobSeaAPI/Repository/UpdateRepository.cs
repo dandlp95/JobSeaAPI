@@ -77,6 +77,7 @@ namespace JobSeaAPI.Repository
         {
             Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateDTO.UpdateId;
             Update update = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "Update Id does not match any entity in the database.");
+            
             await UpdateEntity(update, updateDTO);
             return update;
         }

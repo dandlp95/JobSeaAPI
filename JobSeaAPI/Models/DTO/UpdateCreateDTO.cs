@@ -9,6 +9,5 @@ namespace JobSeaAPI.Models.DTO
         public string notes { get; set; }
         [Required(ErrorMessage = "Status Id is required")]
         public int StatusId { get; set; }
-        public int ApplicationId { get; set; }
     }
 }

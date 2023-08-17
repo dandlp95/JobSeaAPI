@@ -175,7 +175,6 @@ namespace JobSeaAPI.Controllers
 
         private bool IsDuplicateEntryError(DbUpdateException ex)
         {
-            // May implement later.
             return ex.InnerException is SqlException sqlEx &&
                 (sqlEx.Number == 2601 || sqlEx.Number == 2627);
         }

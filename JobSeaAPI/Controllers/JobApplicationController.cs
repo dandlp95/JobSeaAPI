@@ -73,7 +73,6 @@ namespace JobSeaAPI.Controllers
             }
 
         }
-        // ApplicationUpdates/{applicationId}/{userIdRequest}
         [HttpGet("user/{userIdRequest}/Application/{applicationId}/Updates")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
