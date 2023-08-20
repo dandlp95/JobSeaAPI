@@ -75,6 +75,37 @@ namespace JobSeaAPI.Controllers
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
+
+        [HttpGet("users/{userId}/applications/{applicationId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+
+        public async Task<ActionResult<APIResponse>> GetApplication(int userId, int applicationId)
+        {
+            try
+            {
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
+                if (actionResult is not null) return actionResult;
+
+                Application application = _applicationsRepo.GetApplication(applicationId, userId);
+                _response.Result = application;
+                _response.Errors = null;
+                _response.StatusCode = System.Net.HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+        }
+
         [HttpGet("users/{userIdRequest}/applications/{applicationId}/updates")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

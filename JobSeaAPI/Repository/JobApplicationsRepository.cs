@@ -50,7 +50,10 @@ namespace JobSeaAPI.Repository
                 ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "Application not found.");
 
             List<Update> updatesToDelete = await _db.Set<Update>().Where(u => u.ApplicationId == applicationId).ToListAsync();
-            await _updateRepo.DeleteUpdates(updatesToDelete);
+            if (updatesToDelete.Count > 0) 
+            { 
+                await _updateRepo.DeleteUpdates(updatesToDelete); 
+            }
                 
             await DeleteEntity(application);
         }
@@ -59,13 +62,7 @@ namespace JobSeaAPI.Repository
         {
             throw new NotImplementedException();
         }
-        public Application GetApplication(int applicationId)
-        {
-            Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId;
-            Application? application = GetEntity(filter) 
-                ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
-            return application;
-        }
+
         public Application GetApplication(int applicationId, int userId)
         {
             Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId && entity.UserId == userId;

@@ -49,14 +49,11 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO, int applicationId)
+        public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO, int applicationId, int userId)
         {
             try
             {
-                Application application = _applicationsRepo.GetApplication(applicationId) 
-                    ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't belong to any entities in the database");
-
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), application.UserId, _response);
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if (actionResult is not null) return actionResult;
 
                 Update newUpdate = await _updateRepository.CreateUpdate(updateDTO);
@@ -114,7 +111,7 @@ namespace JobSeaAPI.Controllers
             }
         }
 
-        [HttpDelete("users/{UserId}/applications/{ApplicationId/updates/{updateId}")]
+        [HttpDelete("users/{UserId}/applications/{ApplicationId}/updates/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
