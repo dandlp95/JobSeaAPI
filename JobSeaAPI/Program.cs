@@ -45,6 +45,7 @@ builder.Services.AddScoped<IJobApplicationsRepository, JobApplicationsRepository
 builder.Services.AddScoped<IUpdateRepository, UpdateRepository>();
 builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 builder.Services.AddScoped<IExceptionHandler, ExceptionHandler>();
+builder.Services.AddScoped<IPasswordHelper, PasswordHelper>();
 
 
 //// Add services to the container.

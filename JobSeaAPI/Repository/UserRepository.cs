@@ -11,24 +11,24 @@ namespace JobSeaAPI.Repository
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-        IMapper _mapper;
-        public UserRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper) : base(db, logger)
+        private IMapper _mapper;
+        private IPasswordHelper _passwordHelper;
+        public UserRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper, IPasswordHelper passwordHelper) : base(db, logger)
         {
             _mapper = mapper;
+            _passwordHelper = passwordHelper;
         }
 
         public UserDTO? Authenticate(string username, string password)
         {
-            User? foundUser = GetEntity(user => user.Username == username);
+            User? foundUser = GetEntity(user => user.Username == username) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "User not found.");
+            bool match = _passwordHelper.VerifyPassword(password, foundUser.password, foundUser.passwordSalt);
 
-            if (foundUser == null)
+            if (match is false)
             {
-                throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "User not found.");
+                throw new JobSeaException(System.Net.HttpStatusCode.Unauthorized, "Invalid credentials");
             }
-            else if (foundUser.password != password)
-            {
-                throw new JobSeaException(System.Net.HttpStatusCode.Unauthorized, "Invalid credentials.");
-            }
+
             UserDTO responseUser = _mapper.Map<UserDTO>(foundUser);
             return responseUser;
         }
@@ -46,6 +46,8 @@ namespace JobSeaAPI.Repository
         }
         public async Task CreateUser(User user)
         {
+            user.password = _passwordHelper.HashPassword(user.password, out byte[] salt);
+            user.passwordSalt = salt;
             await CreateEntity(user);
         }
         public async Task<User> UpdateUser(UpdateUserDTO userDTO)

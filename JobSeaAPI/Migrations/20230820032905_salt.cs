@@ -10,12 +10,12 @@ namespace JobSeaAPI.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.AddColumn<byte[]>(
                 name: "passwordSalt",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "varbinary(max)",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: new byte[0]);
         }
 
         /// <inheritdoc />

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobSeaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230820024104_salt")]
+    [Migration("20230820032905_salt")]
     partial class salt
     {
         /// <inheritdoc />
@@ -172,9 +172,9 @@ namespace JobSeaAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("passwordSalt")
+                    b.Property<byte[]>("passwordSalt")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("UserId");
 

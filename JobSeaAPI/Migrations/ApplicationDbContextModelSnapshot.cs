@@ -169,9 +169,9 @@ namespace JobSeaAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("passwordSalt")
+                    b.Property<byte[]>("passwordSalt")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("UserId");
 
