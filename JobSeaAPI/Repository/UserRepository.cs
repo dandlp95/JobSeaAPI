@@ -12,20 +12,22 @@ namespace JobSeaAPI.Repository
     public class UserRepository : Repository<User>, IUserRepository
     {
         IMapper _mapper;
-        ApplicationDbContext _db;
         public UserRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper) : base(db, logger)
         {
             _mapper = mapper;
-            _db = db;
         }
 
         public UserDTO? Authenticate(string username, string password)
         {
             User? foundUser = GetEntity(user => user.Username == username);
-            // Password will be hashed.
-            if (foundUser == null || foundUser.password != password)
+
+            if (foundUser == null)
             {
-                return null;
+                throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "User not found.");
+            }
+            else if (foundUser.password != password)
+            {
+                throw new JobSeaException(System.Net.HttpStatusCode.Unauthorized, "Invalid credentials.");
             }
             UserDTO responseUser = _mapper.Map<UserDTO>(foundUser);
             return responseUser;
@@ -39,7 +41,7 @@ namespace JobSeaAPI.Repository
 
         public User GetUser(int userId)
         {
-            User user = GetEntity(user => user.UserId == userId);
+            User user = GetEntity(user => user.UserId == userId) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "User not found.");
             return user;
         }
         public async Task CreateUser(User user)
@@ -49,20 +51,15 @@ namespace JobSeaAPI.Repository
         public async Task<User> UpdateUser(UpdateUserDTO userDTO)
         {
             Expression<Func<User, bool>> expression = entity =>  entity.UserId == userDTO.UserId;
-            User? user = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "UserId does not match any entity in database.");
+            User user = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "UserId does not match any entity in database.");
 
-            if (!string.IsNullOrEmpty(userDTO.Username)) user.Username = userDTO.Username;
-            if (!string.IsNullOrEmpty(userDTO.email)) user.email = userDTO.email;
-            if (!string.IsNullOrEmpty(userDTO.Password)) user.password = userDTO.Password;
-
-            await _db.SaveChangesAsync();
-
+            await UpdateEntity(user, userDTO);
             return user;
         }
 
         public async Task DeleteUser(int userId)
         {
-            User? user = GetEntity(user => user.UserId == userId);
+            User user = GetEntity(user => user.UserId == userId) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "User not found.");
             if (user is not null) await DeleteEntity(user);
         }
     }
