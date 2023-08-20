@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JobSeaAPI.Exceptions;
 using JobSeaAPI.Models;
 using JobSeaAPI.Models.DTO;
 using JobSeaAPI.Repository.IRepository;
@@ -27,11 +28,11 @@ namespace JobSeaAPI.Controllers
         private readonly IJobApplicationsRepository _applicationsRepo;
         private readonly IStatusRepository _statusRepository;
         protected APIResponse _response;
-        private readonly IUserRepository _userRepository;
         private readonly IUpdateRepository _updateRepository;
+        private readonly IExceptionHandler _exceptionHandler;
         public JobApplicationController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, 
                IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository, 
-               IStatusRepository statusRepository,IUserRepository userRepository, IUpdateRepository updateRepository)
+               IStatusRepository statusRepository, IUpdateRepository updateRepository, IExceptionHandler exceptionHandler)
         {
             _mapper = mapper;
             _logger = logger;
@@ -39,14 +40,13 @@ namespace JobSeaAPI.Controllers
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;
-            _userRepository = userRepository;
             _response = new ();
             _statusRepository = statusRepository;
             _updateRepository = updateRepository;
+            _exceptionHandler = exceptionHandler;
         }
 
-        // Gets Applications for a specific user, based on specific criteria
-        [HttpGet("user/{userIdRequest}/applications")]
+        [HttpGet("users/{userId}/applications")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -67,9 +67,9 @@ namespace JobSeaAPI.Controllers
                 return Ok(_response);
             }
 
-            catch (Exception ex)
+            catch (JobSeaException ex)
             {
-                return BadRequest(ex.Message);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
 
         }
@@ -92,59 +92,55 @@ namespace JobSeaAPI.Controllers
             return Ok(_response);
         }
 
-        [HttpPost("Application")]
+        [HttpPost("users/{userId}/applications")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationDTO newApplication)
+        public async Task<IActionResult> CreateApplication(int userId, [FromBody] CreateApplicationDTO newApplication)
         {
             try
             {
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), newApplication.UserId, _response);
+                Claim? tokenUserId = User.FindFirst("userId");
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(tokenUserId, userId, _response);
                 if (actionResult is not null) return actionResult;
 
-                _response.Result = await _applicationsRepo.CreateApplication(newApplication);
+                Application application = await _applicationsRepo.CreateApplication(newApplication, userId);
+                ApplicationDTO applicationDTO = _mapper.Map<ApplicationDTO>(application);
+
+                _response.Result = applicationDTO;
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
                 _response.IsSuccess = true;
                 return Ok(_response);
             }
-            catch (DbUpdateException ex)
+            catch (JobSeaException ex)
             {
-                _response.Result = null;
-                _response.Errors = new List<string>() { ex.InnerException.ToString(),"Error fulfilling this request." };
-                _response.StatusCode = System.Net.HttpStatusCode.NotFound;
-                _response.IsSuccess = false;
-                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
 
         }
 
-        [HttpDelete("Application/{applicationId}")]
+        [HttpDelete("users/{userId}/applications/{applicationId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> DeleteApplication(int applicationId)
+        public async Task<ActionResult<APIResponse>> DeleteApplication(int applicationId, int userId)
         {
             try
             {
-                Claim userIdClaim = User.FindFirst("userId");
-                Application applicationToDelete = _applicationsRepo.GetApplication(applicationId);
+                Claim? userIdClaim = User.FindFirst("userId");
 
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, applicationToDelete.UserId, _response);
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, userId, _response);
                 if (actionResult is not null) return actionResult;
 
-                await _applicationsRepo.DeleteApplication(applicationId);
-                return Ok();
+                await _applicationsRepo.DeleteApplication(applicationId, userId);
+                return NoContent();
             }
-            catch(DbUpdateException ex)
+            catch (JobSeaException ex)
             {
-                _response.IsSuccess = false;
-                _response.Errors = new List<string>() { ex.InnerException.ToString() };
-                _response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
 
@@ -163,41 +159,39 @@ namespace JobSeaAPI.Controllers
                 _response.Result = statuses;
                 return Ok(_response);
             }
-            catch (DbUpdateException ex)
+            catch (JobSeaException ex)
             {
-                _response.IsSuccess = false;
-                _response.Errors = new List<string>() { ex.InnerException.ToString() };
-                _response.Result= null;
-                _response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
 
-        [HttpPut("Applications/{applicationId}")]
+        [HttpPut("users/{userId}/applications/{applicationId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> UpdateJobApplication(int applicationId, [FromBody] UpdateApplicationDTO applicationDTO)
+        public async Task<ActionResult<APIResponse>> UpdateJobApplication(int applicationId, int userId, [FromBody] UpdateApplicationDTO applicationDTO)
         {
             try
             {
-                Application application = await _applicationsRepo.UpdateApplication(applicationDTO, applicationId);
+                Claim? userIdClaim = User.FindFirst("userId");
+
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, userId, _response);
+                if (actionResult is not null) return actionResult;
+
+                Application application = await _applicationsRepo.UpdateApplication(applicationDTO, applicationId, userId);
                 ApplicationDTO updatedApplication = _mapper.Map<ApplicationDTO>(application);
 
                 _response.IsSuccess = true;
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
                 _response.Errors = null;
                 _response.Result = updatedApplication;
+
                 return Ok(_response);
             }
-            catch (DbUpdateException ex)
-            {
-                _response.IsSuccess = false;
-                _response.Errors = new List<string>() { ex.InnerException.ToString() };
-                _response.Result = null;
-                _response.StatusCode = System.Net.HttpStatusCode.InternalServerError;
-                return StatusCode(StatusCodes.Status500InternalServerError, _response);
+            catch (JobSeaException ex) 
+            { 
+                return _exceptionHandler.returnExceptionResponse(ex, _response); 
             }
         }
     }

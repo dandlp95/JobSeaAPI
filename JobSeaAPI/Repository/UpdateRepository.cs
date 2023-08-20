@@ -43,10 +43,10 @@ namespace JobSeaAPI.Repository
         {
             await DeleteEntity(update);
         }
-        public async Task DeleteUpdate(int updateId)
+        public async Task DeleteUpdate(int updateId, int applicationId, int userId)
         {
-            Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateId;
-            Update update = GetEntity(expression);
+            Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateId && entity.ApplicationId == applicationId && entity.Application.UserId == userId;
+            Update? update = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "Update Id does not match any entity in the database.");
             await DeleteEntity(update);
         }
 
@@ -73,10 +73,10 @@ namespace JobSeaAPI.Repository
             Update update = GetEntity(expression);
             return update;
         }
-        public async Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO)
+        public async Task<Update> UpdateUpdate(UpdateUpdateDTO updateDTO, int updateId, int applicationId, int userId)
         {
-            Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateDTO.UpdateId;
-            Update update = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "Update Id does not match any entity in the database.");
+            Expression<Func<Update, bool>> expression = entity => entity.UpdateId == updateId && entity.ApplicationId == applicationId && entity.Application.UserId == userId;
+            Update update = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "Update Id does not match any entity in the database.");
             
             await UpdateEntity(update, updateDTO);
             return update;

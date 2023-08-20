@@ -24,17 +24,18 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public async Task<ApplicationDTO> CreateApplication(CreateApplicationDTO applicationDTORequest)
+        public async Task<Application> CreateApplication(CreateApplicationDTO applicationDTORequest, int userId)
         {
             Application application = _mapper.Map<Application>(applicationDTORequest);
             application.Created = DateTime.Now;
             application.LastUpdated = DateTime.Now;
+            application.UserId = userId;
 
             await CreateEntity(application);
             await _updateRepo.CreateUpdate(applicationDTORequest.firstUpdate, application);
-            ApplicationDTO applicationDTO = _mapper.Map<ApplicationDTO>(application);
-            return applicationDTO;
+            return application;
         }
+
         public List<Application> GetAllApplications(int userId)
         {
             Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
@@ -43,15 +44,16 @@ namespace JobSeaAPI.Repository
         }
 
 
-        public async Task DeleteApplication(int applicationId) 
+        public async Task DeleteApplication(int applicationId, int userId) 
         {
-                List<Update> updatesToDelete = await _db.Set<Update>().Where(u => u.ApplicationId == applicationId).ToListAsync();
-                await _updateRepo.DeleteUpdates(updatesToDelete);
+            Application application = GetEntity(a => a.ApplicationId == applicationId && a.UserId == userId)
+                ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "Application not found.");
 
-                Application application = await dbSet.Where(a => a.ApplicationId == applicationId).FirstOrDefaultAsync();
-                await DeleteEntity(application);
+            List<Update> updatesToDelete = await _db.Set<Update>().Where(u => u.ApplicationId == applicationId).ToListAsync();
+            await _updateRepo.DeleteUpdates(updatesToDelete);
+                
+            await DeleteEntity(application);
         }
-
 
         public Task<Application> GetApplication(string sqlQuery)
         {
@@ -60,25 +62,26 @@ namespace JobSeaAPI.Repository
         public Application GetApplication(int applicationId)
         {
             Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId;
-            Application? application = GetEntity(filter);
+            Application? application = GetEntity(filter) 
+                ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
+            return application;
+        }
+        public Application GetApplication(int applicationId, int userId)
+        {
+            Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId && entity.UserId == userId;
+            Application? application = GetEntity(filter) 
+                ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
             return application;
         }
 
-        public async Task<Application> UpdateApplication(UpdateApplicationDTO applicationDTO, int applicationId, bool updateAllFields = false)
+        public async Task<Application> UpdateApplication(UpdateApplicationDTO applicationDTO, int applicationId, int userId, bool updateAllFields = false)
         {
-            Application? application = GetEntity(e => e.ApplicationId == applicationId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
+            Application? application = GetEntity(e => e.ApplicationId == applicationId && e.UserId == userId) 
+                    ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
             application.LastUpdated = DateTime.Now;
 
-            if (updateAllFields is false) 
-            {
-                await UpdateEntity(application, applicationDTO);
-                return application;
-            }
-            else
-            {
-                await UpdateEntity(application, applicationDTO, true);
-                return application;
-            }
+            await UpdateEntity(application, applicationDTO, updateAllFields);
+            return application;
         }
     }
 }

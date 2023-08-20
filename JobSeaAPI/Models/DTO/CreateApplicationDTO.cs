@@ -15,7 +15,5 @@ namespace JobSeaAPI.Models.DTO
         public string Comments { get; set; }
         [Required]
         public UpdateCreateDTO firstUpdate { get; set; }
-        [Required]
-        public int UserId { get; set; }
     }
 }

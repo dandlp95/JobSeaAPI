@@ -28,12 +28,12 @@ namespace JobSeaAPI.Controllers
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IJobApplicationsRepository _applicationsRepo;
-        private readonly IStatusRepository _statusRepository;
         protected APIResponse _response;
         private readonly IUpdateRepository _updateRepository;
+        private readonly IExceptionHandler _exceptionHandler;
 
         public UpdatesController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ITokenService tokenService, 
-            IJobApplicationsRepository applicationsRepository,IStatusRepository statusRepository, IUpdateRepository updateRepository)
+            IJobApplicationsRepository applicationsRepository, IUpdateRepository updateRepository)
         {
             _mapper = mapper;
             _logger = logger;
@@ -42,7 +42,6 @@ namespace JobSeaAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;
             _response = new();
-            _statusRepository = statusRepository;
             _updateRepository = updateRepository;
         }
         [HttpPost("Application/{ApplicationId}/Update")]
@@ -52,44 +51,46 @@ namespace JobSeaAPI.Controllers
         [Authorize(Policy = "User")]
         public async Task<ActionResult<APIResponse>> CreateUpdate([FromBody] UpdateCreateDTO updateDTO, int applicationId)
         {
-
-            Application application = _applicationsRepo.GetApplication(applicationId);
-            if(application is null)
+            try
             {
-                _response.Result = null;
-                _response.Errors = new List<string>() { "Application Id doesn't match any current applications." };
-                _response.StatusCode = System.Net.HttpStatusCode.BadRequest;
-                _response.IsSuccess = false;
-                return BadRequest(_response);
+                Application application = _applicationsRepo.GetApplication(applicationId) 
+                    ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't belong to any entities in the database");
+
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), application.UserId, _response);
+                if (actionResult is not null) return actionResult;
+
+                Update newUpdate = await _updateRepository.CreateUpdate(updateDTO);
+                UpdateDTO newUpdateDTO = _mapper.Map<UpdateDTO>(newUpdate);
+
+                _response.Result = newUpdateDTO;
+                _response.Errors = new List<string>();
+                _response.StatusCode = System.Net.HttpStatusCode.Created;
+                _response.IsSuccess = true;
+
+                return StatusCode(StatusCodes.Status201Created, _response);
+            }
+            catch(JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
 
-            ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), application.UserId, _response);
-            if (actionResult is not null) return actionResult;
-
-            Update newUpdate = await _updateRepository.CreateUpdate(updateDTO);
-            UpdateDTO newUpdateDTO = _mapper.Map<UpdateDTO>(newUpdate);
-
-            _response.Result = newUpdateDTO;
-            _response.Errors = new List<string>();
-            _response.StatusCode = System.Net.HttpStatusCode.Created;
-            _response.IsSuccess = true;
-
-            return StatusCode(StatusCodes.Status201Created, _response);
         }
 
-        [HttpPut("Updates/{updateId}")]
+        [HttpPut("User/{userId}/Application/{applicationId}/Updates/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> UpdateUpdate(int updateId, [FromBody] UpdateUpdateDTO updateDTO)
+        public async Task<ActionResult<APIResponse>> UpdateUpdate(int updateId,int applicationId, int userId, [FromBody] UpdateUpdateDTO updateDTO)
         {
             try
             {
-                int userId = getUpdateUserId(updateId);
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
+                Claim? tokenUserId = User.FindFirst("userId");
+
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(tokenUserId, userId, _response);
                 if (actionResult is not null) return actionResult;
-                Update update = await _updateRepository.UpdateUpdate(updateDTO);
+
+                Update update = await _updateRepository.UpdateUpdate(updateDTO, updateId, applicationId, userId);
                 UpdateDTO UpdatedUpdate = _mapper.Map<UpdateDTO>(update);
 
                 _response.Result = UpdatedUpdate;
@@ -102,46 +103,31 @@ namespace JobSeaAPI.Controllers
             }
             catch (JobSeaException ex)
             {
-              
-                Exception? innerException = ex.InnerException;
-
-                _response.Result = null;
-                _response.Errors = new List<string>() { ex.Message, innerException.ToString() };
-                _response.StatusCode = ex.StatusCode;
-                _response.Result = null;
-                _response.Token = null;
-
-                return StatusCode((int)ex.StatusCode, _response);
-                
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
 
         }
 
-
-        [HttpDelete("DeleteUpdate/{updateId}")]
+        [HttpDelete("User/{UserId}/Application/{ApplicationId/Update/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> DeleteUpdate(int updateId, [FromBody] UpdateUpdateDTO updateDTO)
+        public async Task<ActionResult<APIResponse>> DeleteUpdate(int updateId, int applicationId, int userId, [FromBody] UpdateUpdateDTO updateDTO)
         {
+            try
+            {
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
+                if (actionResult is not null) return actionResult;
 
-            Update updateToDelete = _updateRepository.GetUpdate(updateId);
-            int applicationId = updateToDelete.ApplicationId;
-            Application application = _applicationsRepo.GetApplication(applicationId);
+                await _updateRepository.DeleteUpdate(updateId, applicationId, userId);
+                return NoContent();
+            }
+            catch(JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
 
-            ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), application.UserId, _response);
-            if (actionResult is not null) return actionResult;
-
-            await _updateRepository.DeleteUpdate(updateToDelete);
-            return NoContent();
-        }
-
-        private int getUpdateUserId(int updateId)
-        {
-            Update? update = _updateRepository.GetUpdate(updateId) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "Update Id does not match any entity in the database.");
-            Application? application = _applicationsRepo.GetApplication(update.ApplicationId) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "Update ApplicationId is invalid."); ; 
-            return application.UserId;
         }
     }
 }
