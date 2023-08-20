@@ -44,7 +44,7 @@ namespace JobSeaAPI.Controllers
             _response = new();
             _updateRepository = updateRepository;
         }
-        [HttpPost("Application/{ApplicationId}/Update")]
+        [HttpPost("users/{userId}/applications/{applicationId}/updates")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -73,10 +73,13 @@ namespace JobSeaAPI.Controllers
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
-
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
         }
 
-        [HttpPut("User/{userId}/Application/{applicationId}/Updates/{updateId}")]
+        [HttpPut("users/{userId}/applications/{applicationId}/updates/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -105,10 +108,13 @@ namespace JobSeaAPI.Controllers
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
-
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
         }
 
-        [HttpDelete("User/{UserId}/Application/{ApplicationId/Update/{updateId}")]
+        [HttpDelete("users/{UserId}/applications/{ApplicationId/updates/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -124,6 +130,10 @@ namespace JobSeaAPI.Controllers
                 return NoContent();
             }
             catch(JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }

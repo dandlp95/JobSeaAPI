@@ -25,9 +25,10 @@ namespace JobSeaAPI.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ApplicationDbContext _db;
         protected APIResponse _response;
+        private IExceptionHandler _exceptionHandler;
 
         public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService, 
-               IHttpContextAccessor httpContextAccessor, ApplicationDbContext db)
+               IHttpContextAccessor httpContextAccessor, ApplicationDbContext db, IExceptionHandler exceptionHandler)
         {
             _db = db;
             _mapper = mapper;
@@ -37,9 +38,10 @@ namespace JobSeaAPI.Controllers
             _configuration = configuration;
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
+            _exceptionHandler = exceptionHandler;
         }
 
-        [HttpGet("Users")]
+        [HttpGet("users")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -52,17 +54,16 @@ namespace JobSeaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
+            catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
             catch (Exception ex)
             {
-                _logger.Log(ex.Message, "error");
-                _response.Result = ex;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.IsSuccess = false;
-                _response.Errors = new List<string>() { ex.ToString() };
-                return _response;
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
-        [HttpGet("Users/{id}")]
+        [HttpGet("users/{id}")]
         [HttpGet("id", Name = "GetUserById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -87,13 +88,17 @@ namespace JobSeaAPI.Controllers
                 UserDTO userDTO = _mapper.Map<UserDTO>(fetchedUser);
                 return Ok(userDTO);
             }
+            catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
             catch (Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, ex);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
 
-        [HttpPost("User")]
+        [HttpPost("users")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -112,18 +117,18 @@ namespace JobSeaAPI.Controllers
 
                 return Ok(_response);
             }
-            catch (DbUpdateException ex)
+            catch (JobSeaException ex)
             {
-                _response.IsSuccess = false;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Errors = new List<string>() { ex.InnerException.ToString(), "Error updating database." };
-                    
-                 return BadRequest(_response);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
 
 
-        [HttpPost("Login")]
+        [HttpPost("auth")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<APIResponse> Login([FromBody] LoginUser userInfo)
@@ -143,18 +148,18 @@ namespace JobSeaAPI.Controllers
                 _response.Result = authenticatedUser;
 
                 return Ok(_response);
-            } catch(DbUpdateException ex)
+            }
+            catch (JobSeaException ex)
             {
-                _response.IsSuccess = true;
-                _response.Token = null;
-                _response.StatusCode = HttpStatusCode.BadRequest;
-                _response.Errors = new List<string>() { ex.InnerException.ToString(), "Error updating database." };
-
-                return Ok(_response);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
 
-        [HttpDelete("Users/{userId}")]
+        [HttpDelete("users/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -166,12 +171,15 @@ namespace JobSeaAPI.Controllers
                 await _dbUser.DeleteUser(userId);
                 return NoContent();
             }
-            catch (DbUpdateException ex)
+            catch (JobSeaException ex)
             {
-                return BadRequest(ex.Message);
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
-
 
         private bool IsDuplicateEntryError(DbUpdateException ex)
         {

@@ -66,30 +66,45 @@ namespace JobSeaAPI.Controllers
                 _response.IsSuccess = true;
                 return Ok(_response);
             }
-
             catch (JobSeaException ex)
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
-
+            catch(Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
         }
-        [HttpGet("user/{userIdRequest}/Application/{applicationId}/Updates")]
+        [HttpGet("users/{userIdRequest}/applications/{applicationId}/updates")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
         public async Task<ActionResult<APIResponse>> GetUpdates(int applicationId, int userIdRequest)
         {
-            ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userIdRequest, _response);
-            if (actionResult is not null) return actionResult;
+            try
+            {
+                Claim? tokenUserId = User.FindFirst("userId");
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(tokenUserId, userIdRequest, _response);
+                if (actionResult is not null) return actionResult;
 
-            List<Update> updates = _updateRepository.GetUpdates(userIdRequest, applicationId);
-            List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
-            _response.Result = updatesDTO;
-            _response.Errors = null;
-            _response.StatusCode = System.Net.HttpStatusCode.OK;
-            _response.IsSuccess = true;
-            return Ok(_response);
+                List<Update> updates = _updateRepository.GetUpdates(userIdRequest, applicationId);
+                List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
+                _response.Result = updatesDTO;
+                _response.Errors = null;
+                _response.StatusCode = System.Net.HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+
         }
 
         [HttpPost("users/{userId}/applications")]
@@ -118,6 +133,10 @@ namespace JobSeaAPI.Controllers
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
 
         }
 
@@ -142,9 +161,13 @@ namespace JobSeaAPI.Controllers
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
         }
 
-        [HttpGet("StatusOptions")]
+        [HttpGet("statusOptions")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -160,6 +183,10 @@ namespace JobSeaAPI.Controllers
                 return Ok(_response);
             }
             catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
@@ -192,6 +219,10 @@ namespace JobSeaAPI.Controllers
             catch (JobSeaException ex) 
             { 
                 return _exceptionHandler.returnExceptionResponse(ex, _response); 
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
         }
     }
