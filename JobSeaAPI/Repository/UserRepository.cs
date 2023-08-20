@@ -53,7 +53,7 @@ namespace JobSeaAPI.Repository
         public async Task<User> UpdateUser(UpdateUserDTO userDTO)
         {
             Expression<Func<User, bool>> expression = entity =>  entity.UserId == userDTO.UserId;
-            User user = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "UserId does not match any entity in database.");
+            User user = GetEntity(expression) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "UserId does not match any entity in database.");
 
             await UpdateEntity(user, userDTO);
             return user;

@@ -8,7 +8,7 @@ namespace JobSeaAPI.Services
         private readonly int _iterations;
         private HashAlgorithmName _hashAlgorithm;
         private int _keySize;
-        PasswordHelper() 
+        public PasswordHelper() 
         { 
             _iterations = 35000;
             _hashAlgorithm = HashAlgorithmName.SHA512;
