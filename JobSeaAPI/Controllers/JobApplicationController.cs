@@ -21,8 +21,6 @@ namespace JobSeaAPI.Controllers
     public class JobApplicationController:ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly ILoggerCustom _logger;
-        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IJobApplicationsRepository _applicationsRepo;
@@ -30,13 +28,10 @@ namespace JobSeaAPI.Controllers
         protected APIResponse _response;
         private readonly IUpdateRepository _updateRepository;
         private readonly IExceptionHandler _exceptionHandler;
-        public JobApplicationController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, 
-               IConfiguration configuration, ITokenService tokenService, IJobApplicationsRepository applicationsRepository, 
+        public JobApplicationController(IMapper mapper, IHttpContextAccessor httpContextAccessor,  ITokenService tokenService, IJobApplicationsRepository applicationsRepository, 
                IStatusRepository statusRepository, IUpdateRepository updateRepository, IExceptionHandler exceptionHandler)
         {
             _mapper = mapper;
-            _logger = logger;
-            _configuration = configuration;
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;

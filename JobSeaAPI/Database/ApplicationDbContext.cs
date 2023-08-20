@@ -30,8 +30,6 @@ namespace JobSeaAPI.Database
                 new Status { StatusId = 4, StatusName = "Applied"},
                 new Status { StatusId = 5, StatusName = "Waiting"}
                 );
-            
-
         }
 
     }

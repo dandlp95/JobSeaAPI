@@ -17,6 +17,7 @@ namespace JobSeaAPI.Models
         public string email { get; set; }
         [Required]
         public string password { get; set; }    
+        public string passwordSalt { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }
