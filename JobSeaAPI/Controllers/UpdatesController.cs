@@ -112,7 +112,7 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> DeleteUpdate(int updateId, int applicationId, int userId, [FromBody] UpdateUpdateDTO updateDTO)
+        public async Task<ActionResult<APIResponse>> DeleteUpdate(int updateId, int applicationId, int userId)
         {
             try
             {
