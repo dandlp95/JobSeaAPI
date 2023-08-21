@@ -107,7 +107,7 @@ namespace JobSeaAPI.Controllers
             }
         }
 
-        [HttpDelete("users/{UserId}/applications/{ApplicationId}/updates/{updateId}")]
+        [HttpDelete("users/{userId}/applications/{applicationId}/updates/{updateId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

@@ -47,14 +47,14 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
 
-        public async Task<ActionResult<APIResponse>> GetApplications(int userIdRequest)
+        public async Task<ActionResult<APIResponse>> GetApplications(int userId)
         {
             try
             {
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userIdRequest, _response);
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if(actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userIdRequest);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId);
                 _response.Result = applications;
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK; 
@@ -101,20 +101,20 @@ namespace JobSeaAPI.Controllers
             }
         }
 
-        [HttpGet("users/{userIdRequest}/applications/{applicationId}/updates")]
+        [HttpGet("users/{userId}/applications/{applicationId}/updates")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
-        public async Task<ActionResult<APIResponse>> GetUpdates(int applicationId, int userIdRequest)
+        public async Task<ActionResult<APIResponse>> GetUpdates(int applicationId, int userId)
         {
             try
             {
                 Claim? tokenUserId = User.FindFirst("userId");
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(tokenUserId, userIdRequest, _response);
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(tokenUserId, userId, _response);
                 if (actionResult is not null) return actionResult;
 
-                List<Update> updates = _updateRepository.GetUpdates(userIdRequest, applicationId);
+                List<Update> updates = _updateRepository.GetUpdates(userId, applicationId);
                 List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
                 _response.Result = updatesDTO;
                 _response.Errors = null;

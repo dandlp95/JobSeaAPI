@@ -121,7 +121,7 @@ namespace JobSeaAPI.Controllers
         }
 
 
-        [HttpPost("auth")]
+        [HttpPost("users/auth")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<APIResponse> Login([FromBody] LoginUser userInfo)
