@@ -67,7 +67,7 @@ namespace JobSeaAPI.Repository
         {
             Expression<Func<Application, bool>> filter = entity => entity.ApplicationId == applicationId && entity.UserId == userId;
             Application? application = GetEntity(filter) 
-                ?? throw new JobSeaException(System.Net.HttpStatusCode.BadRequest, "ApplicationId doesn't match any entity in the database.");
+                ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "ApplicationId doesn't match any entity in the database.");
             return application;
         }
 

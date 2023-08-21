@@ -14,30 +14,24 @@ using System.Net;
 namespace JobSeaAPI.Controllers
 {
     [ApiController]
-    [Route("jobSea/[controller]")]
+    [Route("jobSea")]
     public class UserController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _dbUser;
         private readonly ILoggerCustom _logger;
-        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ApplicationDbContext _db;
         protected APIResponse _response;
-        private IExceptionHandler _exceptionHandler;
+        private readonly IExceptionHandler _exceptionHandler;
 
-        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, IConfiguration configuration, ITokenService tokenService, 
-               IHttpContextAccessor httpContextAccessor, ApplicationDbContext db, IExceptionHandler exceptionHandler)
+        public UserController(IMapper mapper, IUserRepository dbUser, ILoggerCustom logger, ITokenService tokenService, 
+               IExceptionHandler exceptionHandler)
         {
-            _db = db;
             _mapper = mapper;
             _dbUser = dbUser;
             _logger = logger;
             _response = new();
-            _configuration = configuration;
             _tokenService = tokenService;
-            _httpContextAccessor = httpContextAccessor;
             _exceptionHandler = exceptionHandler;
         }
 
@@ -64,7 +58,6 @@ namespace JobSeaAPI.Controllers
             }
         }
         [HttpGet("users/{id}")]
-        [HttpGet("id", Name = "GetUserById")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

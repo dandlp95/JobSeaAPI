@@ -17,7 +17,7 @@ using System.Security.Claims;
 namespace JobSeaAPI.Controllers
 {
     [ApiController]
-    [Route("jobSea/[Controller]")]
+    [Route("jobSea")]
     public class JobApplicationController:ControllerBase
     {
         private readonly IMapper _mapper;

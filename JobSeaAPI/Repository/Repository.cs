@@ -73,35 +73,40 @@ namespace JobSeaAPI.Repository
 
         public async Task<T> UpdateEntity<K>(T entity, K entityDTO, bool updateAllFields = false) where K : class , new() 
         {   
-            if (updateAllFields is true)
+            
+            if (entity is not null &&  entityDTO is not null)
             {
-                if (entity is not null)
+                if (updateAllFields is true)
                 {
                     dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
-                    await _db.SaveChangesAsync();
                 }
-                return entity;
-            } 
-            else
-            {
-                Type entityDTOType = typeof(K);
-                Type entityType = typeof(T);
-
-                PropertyInfo[] dtoProperties = entityDTOType.GetProperties();
-
-                foreach(PropertyInfo dtoProperty in dtoProperties)
+                else
                 {
-                    object? dtoValue = dtoProperty.GetValue(entityDTO);
+                    Type entityDTOType = typeof(K);
+                    Type entityType = typeof(T);
 
-                    if(dtoValue is not null)
+                    PropertyInfo[] dtoProperties = entityDTOType.GetProperties();
+
+                    foreach (PropertyInfo dtoProperty in dtoProperties)
                     {
-                        PropertyInfo? entityProperty = entityType.GetProperty(dtoProperty.Name);
+                        object? dtoValue = dtoProperty.GetValue(entityDTO);
 
-                        entityProperty?.SetValue(entity, dtoValue);
+                        if (dtoValue is not null)
+                        {
+                            PropertyInfo? entityProperty = entityType.GetProperty(dtoProperty.Name);
+
+                            entityProperty?.SetValue(entity, dtoValue);
+                        }
                     }
                 }
+                await _db.SaveChangesAsync();
+                return entity;
             }
-            return entity;
+            else
+            {
+                throw new Exception("Entities cannot be null.");
+            }
+
         }
     }
 }

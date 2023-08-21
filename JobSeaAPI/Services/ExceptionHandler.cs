@@ -2,6 +2,7 @@
 using JobSeaAPI.Exceptions;
 using MagicVilla_VillaAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 
 namespace JobSeaAPI.Services
 {
@@ -13,7 +14,11 @@ namespace JobSeaAPI.Services
             Exception? innerException = ex.InnerException;
 
             response.Result = null;
-            response.Errors = new List<string>() { ex.Message, innerException.ToString() };
+            response.Errors = new List<string>() { ex.Message };
+            if(innerException != null) 
+            { 
+                response.Errors.Add(innerException.Message);
+            }
             response.StatusCode = ex.StatusCode;
             response.Result = null;
             response.Token = null;

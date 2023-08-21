@@ -6,8 +6,8 @@ namespace JobSeaAPI.Services
     public class PasswordHelper : IPasswordHelper
     {
         private readonly int _iterations;
-        private HashAlgorithmName _hashAlgorithm;
-        private int _keySize;
+        private readonly HashAlgorithmName _hashAlgorithm;
+        private  readonly int _keySize;
         public PasswordHelper() 
         { 
             _iterations = 35000;

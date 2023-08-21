@@ -18,31 +18,26 @@ using System.Security.Claims;
 
 namespace JobSeaAPI.Controllers
 {
-    [Route("jobSea/[controller]")]
+    [Route("jobSea")]
     [ApiController]
     public class UpdatesController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly ILoggerCustom _logger;
-        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IJobApplicationsRepository _applicationsRepo;
         protected APIResponse _response;
         private readonly IUpdateRepository _updateRepository;
         private readonly IExceptionHandler _exceptionHandler;
 
-        public UpdatesController(IMapper mapper, ILoggerCustom logger, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ITokenService tokenService, 
-            IJobApplicationsRepository applicationsRepository, IUpdateRepository updateRepository)
+        public UpdatesController(IMapper mapper, ILoggerCustom logger, ITokenService tokenService, IUpdateRepository updateRepository,
+            IExceptionHandler exceptionHandler)
         {
             _mapper = mapper;
             _logger = logger;
-            _configuration = configuration;
             _tokenService = tokenService;
-            _httpContextAccessor = httpContextAccessor;
-            _applicationsRepo = applicationsRepository;
             _response = new();
             _updateRepository = updateRepository;
+            _exceptionHandler = exceptionHandler;
         }
         [HttpPost("users/{userId}/applications/{applicationId}/updates")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -56,7 +51,8 @@ namespace JobSeaAPI.Controllers
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if (actionResult is not null) return actionResult;
 
-                Update newUpdate = await _updateRepository.CreateUpdate(updateDTO);
+                
+                Update newUpdate = await _updateRepository.CreateUpdate(updateDTO, applicationId);
                 UpdateDTO newUpdateDTO = _mapper.Map<UpdateDTO>(newUpdate);
 
                 _response.Result = newUpdateDTO;

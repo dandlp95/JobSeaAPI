@@ -12,8 +12,8 @@ using System.Text;
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
-string secretKey = builder.Configuration.GetValue<string>("AppSettings:SecretKey");
-string ApiUrl = builder.Configuration.GetValue<string>("AppSettings:ApiUrl");
+string secretKey = builder.Configuration.GetValue<string>("AppSettings:SecretKey") ?? throw new Exception("Unable to access key to connect to the database.");
+string ApiUrl = builder.Configuration.GetValue<string>("AppSettings:ApiUrl"); 
 string clientUrl = builder.Configuration.GetValue<string>("AppSettings:clientUrl");
 
 var TokenValidationParameters = new TokenValidationParameters
