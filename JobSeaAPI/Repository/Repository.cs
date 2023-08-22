@@ -73,40 +73,33 @@ namespace JobSeaAPI.Repository
 
         public async Task<T> UpdateEntity<K>(T entity, K entityDTO, bool updateAllFields = false) where K : class , new() 
         {   
-            
-            if (entity is not null &&  entityDTO is not null)
+            if(entity is null ||  entityDTO is null) throw new Exception("Entities cannot be null.");
+
+            if (updateAllFields is true)
             {
-                if (updateAllFields is true)
-                {
-                    dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
-                }
-                else
-                {
-                    Type entityDTOType = typeof(K);
-                    Type entityType = typeof(T);
-
-                    PropertyInfo[] dtoProperties = entityDTOType.GetProperties();
-
-                    foreach (PropertyInfo dtoProperty in dtoProperties)
-                    {
-                        object? dtoValue = dtoProperty.GetValue(entityDTO);
-
-                        if (dtoValue is not null)
-                        {
-                            PropertyInfo? entityProperty = entityType.GetProperty(dtoProperty.Name);
-
-                            entityProperty?.SetValue(entity, dtoValue);
-                        }
-                    }
-                }
-                await _db.SaveChangesAsync();
-                return entity;
+                dbSet.Entry(entity).CurrentValues.SetValues(entityDTO);
             }
             else
             {
-                throw new Exception("Entities cannot be null.");
-            }
+                Type entityDTOType = typeof(K);
+                Type entityType = typeof(T);
 
+                PropertyInfo[] dtoProperties = entityDTOType.GetProperties();
+
+                foreach (PropertyInfo dtoProperty in dtoProperties)
+                {
+                    object? dtoValue = dtoProperty.GetValue(entityDTO);
+
+                    if (dtoValue is not null)
+                    {
+                        PropertyInfo? entityProperty = entityType.GetProperty(dtoProperty.Name);
+
+                        entityProperty?.SetValue(entity, dtoValue);
+                    }
+                }
+            }
+            await _db.SaveChangesAsync();
+            return entity;
         }
     }
 }
