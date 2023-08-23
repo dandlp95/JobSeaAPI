@@ -9,9 +9,11 @@ namespace JobSeaAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UpdateId { get; set; }
         public DateTime Created { get; set; }
+        [Column(TypeName = "date")]
         public DateTime? EventDate { get; set; }
+        public TimeSpan? EventTime { get; set; }
         [Required]
-        public string notes { get; set; }  
+        public string Notes { get; set; }  
         [Required]
         public int StatusId { get; set; }
         [Required]

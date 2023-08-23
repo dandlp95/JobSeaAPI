@@ -4,6 +4,7 @@ using JobSeaAPI.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobSeaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230823033620_renamedTimeColumnSecondTry")]
+    partial class renamedTimeColumnSecondTry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,7 +133,7 @@ namespace JobSeaAPI.Migrations
                     b.Property<DateTime?>("EventDate")
                         .HasColumnType("date");
 
-                    b.Property<TimeSpan?>("EventTime")
+                    b.Property<TimeSpan>("EventTime")
                         .HasColumnType("time");
 
                     b.Property<string>("Notes")
