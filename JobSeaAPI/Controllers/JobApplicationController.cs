@@ -55,7 +55,8 @@ namespace JobSeaAPI.Controllers
                 if(actionResult is not null) return actionResult;
 
                 List<Application> applications = _applicationsRepo.GetAllApplications(userId);
-                _response.Result = applications;
+                List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
+                _response.Result = applicationsDTO;
                 _response.Errors = null;
                 _response.StatusCode = System.Net.HttpStatusCode.OK; 
                 _response.IsSuccess = true;
