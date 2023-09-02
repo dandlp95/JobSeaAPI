@@ -39,6 +39,7 @@ namespace JobSeaAPI.Controllers
             _updateRepository = updateRepository;
             _exceptionHandler = exceptionHandler;
         }
+
         [HttpPost("users/{userId}/applications/{applicationId}/updates")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -51,7 +52,7 @@ namespace JobSeaAPI.Controllers
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if (actionResult is not null) return actionResult;
 
-                
+
                 Update newUpdate = await _updateRepository.CreateUpdate(updateDTO, applicationId);
                 UpdateDTO newUpdateDTO = _mapper.Map<UpdateDTO>(newUpdate);
 
@@ -62,7 +63,7 @@ namespace JobSeaAPI.Controllers
 
                 return StatusCode(StatusCodes.Status201Created, _response);
             }
-            catch(JobSeaException ex)
+            catch (JobSeaException ex)
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
@@ -70,6 +71,39 @@ namespace JobSeaAPI.Controllers
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
+        }
+
+
+        [HttpGet("users/{userId}/applications/{applicationId}/updates")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Authorize(Policy = "User")]
+        public async Task<ActionResult<APIResponse>> GetUpdates(int applicationId, int userId)
+        {
+            try
+            {
+                Claim? tokenUserId = User.FindFirst("userId");
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(tokenUserId, userId, _response);
+                if (actionResult is not null) return actionResult;
+
+                List<Update> updates = _updateRepository.GetUpdates(userId, applicationId);
+                List<UpdateDTO> updatesDTO = _mapper.Map<List<UpdateDTO>>(updates);
+                _response.Result = updatesDTO;
+                _response.Errors = null;
+                _response.StatusCode = System.Net.HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+            }
+            catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+
         }
 
         [HttpPut("users/{userId}/applications/{applicationId}/updates/{updateId}")]

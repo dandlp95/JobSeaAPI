@@ -68,10 +68,7 @@ namespace JobSeaAPI.Controllers
             {
                 if (id < 1)
                 {
-                    _logger.Log("Id is invalid", "error");
-                    _response.StatusCode = HttpStatusCode.BadRequest;
-                    _response.IsSuccess = false;
-                    return BadRequest(_response);
+                    throw new JobSeaException(HttpStatusCode.BadRequest, "Invalid Id.");
                 }
                 User fetchedUser = _dbUser.GetUser(id);
                 if (fetchedUser == null)
