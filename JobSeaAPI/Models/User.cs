@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JobSeaAPI.Models
 {
-    [Index(nameof(email), IsUnique = true)]
+    [Index(nameof(Email), IsUnique = true)]
     [Index(nameof(Username), IsUnique = true)]
     public class User
     {
@@ -14,10 +14,10 @@ namespace JobSeaAPI.Models
         [Required]
         public string Username { get; set; }
         [Required]
-        public string email { get; set; }
+        public string Email { get; set; }
         [Required]
-        public string password { get; set; }    
-        public byte[] passwordSalt { get; set; }
+        public string Password { get; set; }    
+        public byte[] PasswordSalt { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }

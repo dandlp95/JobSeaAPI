@@ -6,7 +6,7 @@ namespace JobSeaAPI.Models.DTO
     {
         public int UserId { get; set; }
         public string Username { get; set; }
-        public string email { get; set; }
+        public string Email { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }

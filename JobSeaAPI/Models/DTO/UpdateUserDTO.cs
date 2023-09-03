@@ -9,7 +9,7 @@ namespace JobSeaAPI.Models.DTO
         [StringLength(30, ErrorMessage = "Usernames cannot exceed 30 characters.")]
         public string Username { get; set; }
         [EmailAddress(ErrorMessage = "Invalid email format.")]
-        public string email { get; set; }
+        public string Email { get; set; }
         public string Password { get; set; }
     }
 }

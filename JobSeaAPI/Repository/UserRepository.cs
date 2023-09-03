@@ -22,7 +22,7 @@ namespace JobSeaAPI.Repository
         public UserDTO? Authenticate(string username, string password)
         {
             User? foundUser = GetEntity(user => user.Username == username) ?? throw new JobSeaException(System.Net.HttpStatusCode.NotFound, "User not found.");
-            bool match = _passwordHelper.VerifyPassword(password, foundUser.password, foundUser.passwordSalt);
+            bool match = _passwordHelper.VerifyPassword(password, foundUser.Password, foundUser.PasswordSalt);
 
             if (match is false)
             {
@@ -46,8 +46,8 @@ namespace JobSeaAPI.Repository
         }
         public async Task CreateUser(User user)
         {
-            user.password = _passwordHelper.HashPassword(user.password, out byte[] salt);
-            user.passwordSalt = salt;
+            user.Password = _passwordHelper.HashPassword(user.Password, out byte[] salt);
+            user.PasswordSalt = salt;
             await CreateEntity(user);
         }
         public async Task<User> UpdateUser(UpdateUserDTO userDTO)

@@ -14,6 +14,6 @@ namespace JobSeaAPI.Models.DTO
         public string Link { get; set; }
         public string Comments { get; set; }
         [Required]
-        public UpdateCreateDTO firstUpdate { get; set; }
+        public UpdateCreateDTO FirstUpdate { get; set; }
     }
 }

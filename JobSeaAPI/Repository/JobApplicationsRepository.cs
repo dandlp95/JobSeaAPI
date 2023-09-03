@@ -32,7 +32,7 @@ namespace JobSeaAPI.Repository
             application.UserId = userId;
 
             await CreateEntity(application);
-            await _updateRepo.CreateUpdate(applicationDTORequest.firstUpdate, application);
+            await _updateRepo.CreateUpdate(applicationDTORequest.FirstUpdate, application);
             return application;
         }
 
