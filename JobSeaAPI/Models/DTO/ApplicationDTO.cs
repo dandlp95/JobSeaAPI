@@ -15,5 +15,6 @@ namespace JobSeaAPI.Models.DTO
         public DateTime Created { get; set; }
         public DateTime LastUpdated { get; set; }
         public int UserId { get; set; }
+        public int? ModalityId { get; set; }
     }
 }

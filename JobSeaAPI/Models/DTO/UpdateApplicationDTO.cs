@@ -10,5 +10,6 @@ namespace JobSeaAPI.Models.DTO
         public string Location { get; set; }
         public string Link { get; set; }
         public string Comments { get; set; }
+        public int ModalityId { get; set; }
     }
 }

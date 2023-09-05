@@ -15,7 +15,7 @@ namespace JobSeaAPI.Database
         public DbSet<Application> Applications { get; set; }
         public DbSet<Status> Status { get; set; }
         public DbSet<Update> Updates { get; set; }
-
+        public DbSet<Modality> Modalities { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -29,6 +29,11 @@ namespace JobSeaAPI.Database
                 new Status { StatusId = 3, StatusName = "Interview Scheduled" },
                 new Status { StatusId = 4, StatusName = "Applied"},
                 new Status { StatusId = 5, StatusName = "Waiting"}
+                );
+            modelBuilder.Entity<Modality>().HasData(
+                new Modality { ModalityId = 1, Name = "On Site" },
+                new Modality { ModalityId = 2, Name = "Hybrid" },
+                new Modality { ModalityId = 3, Name = "Remote" }
                 );
         }
 

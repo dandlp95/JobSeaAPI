@@ -14,7 +14,7 @@ namespace JobSeaAPI.Models
         public string Company { get; set; } 
         [Required]
         public string JobTitle { get; set; } 
-        public int? Salary { get; set; } 
+        public int Salary { get; set; } 
         public string? Location { get; set; } 
         public string? Link { get; set; } 
         public string? Comments { get; set; } 
@@ -23,7 +23,10 @@ namespace JobSeaAPI.Models
         public DateTime LastUpdated { get; set; }
         [Required]
         public int UserId { get; set; }
+        public int? ModalityId { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }
+        [ForeignKey("ModalityId")]
+        public Modality? Modality { get; set; }
     }
 }
