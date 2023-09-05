@@ -14,7 +14,7 @@ namespace JobSeaAPI.Models
         public string Company { get; set; } 
         [Required]
         public string JobTitle { get; set; } 
-        public int Salary { get; set; } 
+        public int? Salary { get; set; } 
         public string? Location { get; set; } 
         public string? Link { get; set; } 
         public string? Comments { get; set; } 

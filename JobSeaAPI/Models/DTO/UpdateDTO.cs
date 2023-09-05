@@ -13,7 +13,7 @@ namespace JobSeaAPI.Models.DTO
         public TimeSpan? EventTime { get; set; }
         public string Notes { get; set; }
         // Having the Status here is helpful so client doesn't have to make another call for that information.
-        public Status Status { get; set; }
+        public Status? Status { get; set; }
         public int ApplicationId { get; set; }
     }
 }
