@@ -40,12 +40,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
 builder.Services.AddSingleton<ILoggerCustom, LoggerCustom>();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IModalityRepository, ModalityRepository>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddScoped<IJobApplicationsRepository, JobApplicationsRepository>();
 builder.Services.AddScoped<IUpdateRepository, UpdateRepository>();
 builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 builder.Services.AddScoped<IExceptionHandler, ExceptionHandler>();
 builder.Services.AddScoped<IPasswordHelper, PasswordHelper>();
+
 
 
 //// Add services to the container.

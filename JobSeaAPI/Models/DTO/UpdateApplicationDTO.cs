@@ -9,7 +9,8 @@ namespace JobSeaAPI.Models.DTO
         public int? Salary { get; set; }
         public string Location { get; set; }
         public string Link { get; set; }
+        public string? JobDetails { get; set; }
         public string Comments { get; set; }
-        public int ModalityId { get; set; }
+        public int? ModalityId { get; set; }
     }
 }
