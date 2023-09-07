@@ -37,7 +37,7 @@ namespace JobSeaAPI.Controllers
                 _response.StatusCode = System.Net.HttpStatusCode.OK;
                 _response.IsSuccess = true;
 
-                return Ok(modalities);
+                return Ok(_response);
             }
             catch (JobSeaException ex)
             {

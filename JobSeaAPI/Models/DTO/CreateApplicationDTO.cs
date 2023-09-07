@@ -10,7 +10,8 @@ namespace JobSeaAPI.Models.DTO
         [Required(ErrorMessage = "Job title is required")]
         public string JobTitle { get; set; }
         public int? Salary { get; set; }
-        public string Location { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
         public string Link { get; set; }
         public string? JobDetails { get; set; }
         public string Comments { get; set; }
