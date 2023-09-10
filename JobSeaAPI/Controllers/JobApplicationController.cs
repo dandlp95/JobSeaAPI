@@ -24,21 +24,19 @@ namespace JobSeaAPI.Controllers
         private readonly ITokenService _tokenService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IJobApplicationsRepository _applicationsRepo;
-        private readonly IStatusRepository _statusRepository;
         protected APIResponse _response;
-        private readonly IUpdateRepository _updateRepository;
         private readonly IExceptionHandler _exceptionHandler;
+        private readonly ILocationRepository _locationRepository;
         public JobApplicationController(IMapper mapper, IHttpContextAccessor httpContextAccessor,  ITokenService tokenService, IJobApplicationsRepository applicationsRepository, 
-               IStatusRepository statusRepository, IUpdateRepository updateRepository, IExceptionHandler exceptionHandler)
+               IExceptionHandler exceptionHandler, ILocationRepository locationRepository)
         {
             _mapper = mapper;
             _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _applicationsRepo = applicationsRepository;
             _response = new ();
-            _statusRepository = statusRepository;
-            _updateRepository = updateRepository;
             _exceptionHandler = exceptionHandler;
+            _locationRepository = locationRepository;
         }
 
         [HttpGet("users/{userId}/applications")]
@@ -195,6 +193,39 @@ namespace JobSeaAPI.Controllers
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
+        }
+        [HttpGet("locations")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> GetLocation([FromQuery] int? country, [FromQuery] int? state)
+        {
+            if (country is null && state is null)
+            {  
+                List<Country> countries = _locationRepository.GetCountries();
+                _response.Result = countries;
+                _response.IsSuccess = true;
+                _response.Errors = new List<string>();
+                _response.StatusCode = HttpStatusCode.OK;
+            }
+            else if (state is null && country is not null)
+            {   
+                List<State> states = _locationRepository.GetStates((int)country);
+                _response.Result = states;
+                _response.IsSuccess = true;
+                _response.Errors = new List<string>();
+                _response.StatusCode = HttpStatusCode.OK;
+            }
+            else if (state is not null)
+            {
+                List<City> cities = _locationRepository.GetCities((int)state);
+                _response.Result = cities;
+                _response.IsSuccess = true;
+                _response.Errors = new List<string>();
+                _response.StatusCode = HttpStatusCode.OK;
+            }
+            return Ok(_response);
         }
     }
 }

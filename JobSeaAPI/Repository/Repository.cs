@@ -30,7 +30,7 @@ namespace JobSeaAPI.Repository
             dbSet = _db.Set<T>();
         }
 
-        public List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null)
+        protected List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null)
         {
             IQueryable<T> query = dbSet;
             if (filter is not null) query = query.Where(filter);
@@ -38,7 +38,7 @@ namespace JobSeaAPI.Repository
             return query.ToList();
         }
 
-        public T? GetEntity(Expression<Func<T, bool>>? filter)
+        protected T? GetEntity(Expression<Func<T, bool>>? filter)
         {
             IQueryable<T> query = dbSet;
             if(filter != null)
@@ -48,19 +48,19 @@ namespace JobSeaAPI.Repository
             return query.FirstOrDefault();
         }
 
-        public async Task<T> CreateEntity(T newEntity)
+        protected async Task<T> CreateEntity(T newEntity)
         {
             _db.Set<T>().Add(newEntity);
             await _db.SaveChangesAsync();
             return newEntity;
 
         }
-        public async Task DeleteEntities(List<T> entities)
+        protected async Task DeleteEntities(List<T> entities)
         {
             dbSet.RemoveRange(entities);
             await _db.SaveChangesAsync();
         }
-        public async Task<bool> DeleteEntity(T entity)
+        protected async Task<bool> DeleteEntity(T entity)
         {
             if(entity is not null)
             {
@@ -71,7 +71,7 @@ namespace JobSeaAPI.Repository
             return false;
         }
 
-        public async Task<T> UpdateEntity<K>(T entity, K entityDTO, bool updateAllFields = false) where K : class , new() 
+        protected async Task<T> UpdateEntity<K>(T entity, K entityDTO, bool updateAllFields = false) where K : class , new() 
         {   
             if(entity is null ||  entityDTO is null) throw new Exception("Entities cannot be null.");
 
