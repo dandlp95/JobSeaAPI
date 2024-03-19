@@ -48,6 +48,8 @@ builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 builder.Services.AddScoped<IExceptionHandler, ExceptionHandler>();
 builder.Services.AddScoped<IPasswordHelper, PasswordHelper>();
 builder.Services.AddSingleton<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ISqlBuilder, SqlBuilder
+    >();
 
 
 

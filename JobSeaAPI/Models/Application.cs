@@ -6,7 +6,6 @@ namespace JobSeaAPI.Models
 {
     public class Application
     {
-        // Since everything should be sent to the user, I dont think I need an ApplicationDTO.
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ApplicationId { get; set; }

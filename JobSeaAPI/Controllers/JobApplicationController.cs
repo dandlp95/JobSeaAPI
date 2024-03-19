@@ -45,14 +45,14 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
 
-        public ActionResult<APIResponse> GetApplications(int userId)
+        public ActionResult<APIResponse> GetApplications(int userId, FilterOptionsDTO? filterOptions)
         {
             try
             {
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if(actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
                 _response.Result = applicationsDTO;
                 _response.Errors = null;

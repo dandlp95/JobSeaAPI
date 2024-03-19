@@ -16,11 +16,13 @@ namespace JobSeaAPI.Repository
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
         private readonly IUpdateRepository _updateRepo;
-        public JobApplicationsRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper, IUpdateRepository updateRepo) : base(db, logger)
+        private readonly ISqlBuilder _sqlBuilder;
+        public JobApplicationsRepository(ApplicationDbContext db, ILoggerCustom logger, IMapper mapper, IUpdateRepository updateRepo, ISqlBuilder sqlBuilder) : base(db, logger)
         {
             _db = db;
             _mapper = mapper;
             _updateRepo = updateRepo;   
+            _sqlBuilder = sqlBuilder;
         }
 
 
@@ -36,10 +38,20 @@ namespace JobSeaAPI.Repository
             return application;
         }
 
-        public List<Application> GetAllApplications(int userId)
+        public List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions)
         {
-            Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
-            List<Application> results = GetAllEntities(filter);
+            List<Application> results = new();
+            if (filterOptions == null)
+            {
+                Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
+                results = GetAllEntities(filter);
+            }
+            else
+            {
+                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions);
+                results = _db.Applications.FromSqlRaw(applicationsQuery).ToList();
+            }
+
             return results;
         }
 
