@@ -45,14 +45,14 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
 
-        public ActionResult<APIResponse> GetApplications(int userId, FilterOptionsDTO? filterOptions)
+        public ActionResult<APIResponse> GetApplications(int userId)
         {
             try
             {
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if(actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
                 _response.Result = applicationsDTO;
                 _response.Errors = null;
@@ -226,6 +226,40 @@ namespace JobSeaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.OK;
             }
             return Ok(_response);
+        }
+
+        [HttpPost("users/{userId}/applications/search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string searchTerm, [FromBody] FilterOptionsDTO filterOptions, int userId)
+        {
+            try
+            {
+                Claim? userIdClaim = User.FindFirst("userId");
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, userId, _response);
+
+                if (actionResult is not null) return actionResult;
+
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions);
+                List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
+
+                _response.Result = applicationsDTO;
+                _response.Errors = null;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+
+            }
+            catch(JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
         }
     }
 }
