@@ -6,13 +6,13 @@ namespace JobSeaAPI.Services
     {
         public SqlBuilder() { }
 
-        public string BuildSql(FilterOptionsDTO filterOptions)
+        public string BuildSql(FilterOptionsDTO filterOptions, int userId)
         {
-            string sqlQuery = @"
+            string sqlQuery = @$"
                 SELECT ApplicationId, Company, JobTitle, Salary, City, State, Link, JobDetails, Comments, Created,
                     Last Updated, UserId, ModalityId
                 FROM Application     
-                WHERE 1 = 1
+                WHERE UserId = {userId}
                 ";
 
             if(filterOptions.Locations is not null)
@@ -32,6 +32,11 @@ namespace JobSeaAPI.Services
             if(filterOptions.SalaryRange is not null)
             {
                 sqlQuery += $"AND Salary BETWEEN ${filterOptions.SalaryRange?.min} AND ${filterOptions.SalaryRange?.max}";
+            }
+            if(filterOptions.Company is not null)
+            {
+                string companyFilter = string.Join(" OR ", filterOptions.Company.Select(company => $"company = '{company}'"));
+                sqlQuery += companyFilter;
             }
 
             return sqlQuery;
