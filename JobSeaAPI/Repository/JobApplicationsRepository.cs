@@ -38,7 +38,7 @@ namespace JobSeaAPI.Repository
             return application;
         }
 
-        public List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions)
+        public List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions, string? searchTerm )
         {
             List<Application> results = new();
             if (filterOptions == null)
@@ -48,7 +48,7 @@ namespace JobSeaAPI.Repository
             }
             else
             {
-                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions);
+                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions, userId);
                 results = _db.Applications.FromSqlRaw(applicationsQuery).ToList();
             }
 

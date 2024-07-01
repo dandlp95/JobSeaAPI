@@ -233,7 +233,7 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string searchTerm, [FromBody] FilterOptionsDTO filterOptions, int userId)
+        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string? searchTerm, [FromBody] FilterOptionsDTO? filterOptions, int userId)
         {
             try
             {
@@ -242,7 +242,7 @@ namespace JobSeaAPI.Controllers
 
                 if (actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions, searchTerm);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
 
                 _response.Result = applicationsDTO;
