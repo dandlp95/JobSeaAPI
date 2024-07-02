@@ -52,7 +52,7 @@ namespace JobSeaAPI.Controllers
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if(actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null, null);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
                 _response.Result = applicationsDTO;
                 _response.Errors = null;

@@ -48,7 +48,7 @@ namespace JobSeaAPI.Repository
             }
             else
             {
-                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions, userId);
+                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions, searchTerm,userId);
                 results = _db.Applications.FromSqlRaw(applicationsQuery).ToList();
             }
 
