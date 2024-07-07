@@ -40,21 +40,21 @@ namespace JobSeaAPI.Services
             }
             if (filterOptions.StatusId?.Length > 0)
             {
-                string statusFilter = string.Join(" OR ", filterOptions.StatusId.Select(statusId => $"StatusId = {statusId}"));
-                sqlQuery += $"AND {statusFilter}";
+                string statusFilter = string.Join(" OR ", filterOptions.StatusId.Select(statusId => $"S.StatusId = {statusId}"));
+                sqlQuery += $" AND {statusFilter}";
             }
 
             if (filterOptions.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is not null)
             {
-                sqlQuery += $"AND Salary BETWEEN {filterOptions.SalaryRange?.min} AND {filterOptions.SalaryRange?.max}";
+                sqlQuery += $" AND Salary BETWEEN {filterOptions.SalaryRange?.min} AND {filterOptions.SalaryRange?.max}";
             }
             else if (filterOptions.SalaryRange?.min is null && filterOptions.SalaryRange?.max is not null)
             {
-                sqlQuery += $"AND Salary <= {filterOptions.SalaryRange?.max}";
+                sqlQuery += $" AND Salary <= {filterOptions.SalaryRange?.max}";
             }
             else if (filterOptions.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is null)
             {
-                sqlQuery += $"AND Salary >= {filterOptions.SalaryRange?.min}";
+                sqlQuery += $" AND Salary >= {filterOptions.SalaryRange?.min}";
             }
 
             if (filterOptions.Company?.Length > 0)

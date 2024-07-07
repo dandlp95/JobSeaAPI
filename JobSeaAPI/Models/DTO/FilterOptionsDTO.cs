@@ -8,6 +8,6 @@
         // use the modalitie's Ids
         public int[]? Modalities { get; set; }
         public int[]? StatusId { get; set; }
-        public (int min, int max)? SalaryRange { get; set; }
+        public (int? min, int? max)? SalaryRange { get; set; }
     }
 }
