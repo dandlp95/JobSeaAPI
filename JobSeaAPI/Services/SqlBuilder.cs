@@ -19,36 +19,45 @@ namespace JobSeaAPI.Services
                     ) latest_u ON A.ApplicationId = latest_u.ApplicationId
                     JOIN Updates U ON latest_u.MaxId = U.UpdateId
                     LEFT JOIN Status S ON S.StatusId = U.StatusId
-                    LEFT JOIN Modality M ON M.Id = A.ModalityId
+                    LEFT JOIN Modalities M ON M.ModalityId = A.ModalityId
                 WHERE UserId = {userId}
                 ";
 
-            if (filterOptions.States is not null)
+            if (filterOptions.States?.Length > 0)
             {
                 string statesFilter = string.Join(" OR ", filterOptions.States.Select(state => $"state = '{state}')"));
                 sqlQuery += $" AND ({statesFilter})";
             }
-            if (filterOptions.Cities is not null)
+            if (filterOptions.Cities?.Length > 0)
             {
                 string citiesFilter = string.Join(" OR ", filterOptions.Cities.Select(city => $"city = '{city}'"));
                 sqlQuery += $" AND ({citiesFilter})";
             }
-            if (filterOptions.Modalities is not null)
+            if (filterOptions.Modalities?.Length > 0)
             {
-                string modalitiesFilter = string.Join(" OR ", filterOptions.Modalities.Select(modalityId => $"ModalityId = {modalityId}"));
+                string modalitiesFilter = string.Join(" OR ", filterOptions.Modalities.Select(modalityId => $"M.ModalityId = {modalityId}"));
                 sqlQuery += $" AND ({modalitiesFilter})";
             }
-            if (filterOptions.StatusId is not null)
+            if (filterOptions.StatusId?.Length > 0)
             {
                 string statusFilter = string.Join(" OR ", filterOptions.StatusId.Select(statusId => $"StatusId = {statusId}"));
                 sqlQuery += $"AND {statusFilter}";
             }
-            //Need to update this in case one or both salary range numbers are null...
-            if (filterOptions.SalaryRange is not null)
+
+            if (filterOptions.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is not null)
             {
-                sqlQuery += $"AND Salary BETWEEN ${filterOptions.SalaryRange?.min} AND ${filterOptions.SalaryRange?.max}";
+                sqlQuery += $"AND Salary BETWEEN {filterOptions.SalaryRange?.min} AND {filterOptions.SalaryRange?.max}";
             }
-            if (filterOptions.Company is not null)
+            else if (filterOptions.SalaryRange?.min is null && filterOptions.SalaryRange?.max is not null)
+            {
+                sqlQuery += $"AND Salary <= {filterOptions.SalaryRange?.max}";
+            }
+            else if (filterOptions.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is null)
+            {
+                sqlQuery += $"AND Salary >= {filterOptions.SalaryRange?.min}";
+            }
+
+            if (filterOptions.Company?.Length > 0)
             {
                 string companyFilter = string.Join(" OR ", filterOptions.Company.Select(company => $"company = '{company}'"));
                 sqlQuery += companyFilter;
