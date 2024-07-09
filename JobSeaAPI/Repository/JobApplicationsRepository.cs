@@ -41,12 +41,12 @@ namespace JobSeaAPI.Repository
         public List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions, string? searchTerm )
         {
             List<Application> results = new();
-            if (filterOptions == null)
+            if (filterOptions is null && searchTerm is null)
             {
                 Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
                 results = GetAllEntities(filter);
             }
-            else
+            else 
             {
                 string applicationsQuery = _sqlBuilder.BuildSql(filterOptions, searchTerm,userId);
                 results = _db.Applications.FromSqlRaw(applicationsQuery).ToList();

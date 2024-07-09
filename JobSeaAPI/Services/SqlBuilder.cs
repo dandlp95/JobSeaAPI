@@ -6,7 +6,7 @@ namespace JobSeaAPI.Services
     {
         public SqlBuilder() { }
 
-        public string BuildSql(FilterOptionsDTO filterOptions, string? searchTerm, int userId)
+        public string BuildSql(FilterOptionsDTO? filterOptions, string? searchTerm, int userId)
         {
             string sqlQuery = @$"
                 SELECT A.ApplicationId, A.Company, A.JobTitle, A.Salary, A.City, A.State, A.Link, A.JobDetails, A.Comments, A.Created,
@@ -23,50 +23,54 @@ namespace JobSeaAPI.Services
                 WHERE UserId = {userId}
                 ";
 
-            if (filterOptions.States?.Length > 0)
+            if (filterOptions is not null)
             {
-                string statesFilter = string.Join(" OR ", filterOptions.States.Select(state => $"state = '{state}')"));
-                sqlQuery += $" AND ({statesFilter})";
-            }
-            if (filterOptions.Cities?.Length > 0)
-            {
-                string citiesFilter = string.Join(" OR ", filterOptions.Cities.Select(city => $"city = '{city}'"));
-                sqlQuery += $" AND ({citiesFilter})";
-            }
-            if (filterOptions.Modalities?.Length > 0)
-            {
-                string modalitiesFilter = string.Join(" OR ", filterOptions.Modalities.Select(modalityId => $"M.ModalityId = {modalityId}"));
-                sqlQuery += $" AND ({modalitiesFilter})";
-            }
-            if (filterOptions.StatusId?.Length > 0)
-            {
-                string statusFilter = string.Join(" OR ", filterOptions.StatusId.Select(statusId => $"S.StatusId = {statusId}"));
-                sqlQuery += $" AND {statusFilter}";
+                if (filterOptions?.States?.Length > 0)
+                {
+                    string statesFilter = string.Join(" OR ", filterOptions.States.Select(state => $"state = '{state}')"));
+                    sqlQuery += $" AND ({statesFilter})";
+                }
+                if (filterOptions?.Cities?.Length > 0)
+                {
+                    string citiesFilter = string.Join(" OR ", filterOptions.Cities.Select(city => $"city = '{city}'"));
+                    sqlQuery += $" AND ({citiesFilter})";
+                }
+                if (filterOptions?.Modalities?.Length > 0)
+                {
+                    string modalitiesFilter = string.Join(" OR ", filterOptions.Modalities.Select(modalityId => $"M.ModalityId = {modalityId}"));
+                    sqlQuery += $" AND ({modalitiesFilter})";
+                }
+                if (filterOptions?.StatusId?.Length > 0)
+                {
+                    string statusFilter = string.Join(" OR ", filterOptions.StatusId.Select(statusId => $"S.StatusId = {statusId}"));
+                    sqlQuery += $" AND {statusFilter}";
+                }
+
+                if (filterOptions?.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is not null)
+                {
+                    sqlQuery += $" AND Salary BETWEEN {filterOptions.SalaryRange?.min} AND {filterOptions.SalaryRange?.max}";
+                }
+                else if (filterOptions?.SalaryRange?.min is null && filterOptions.SalaryRange?.max is not null)
+                {
+                    sqlQuery += $" AND Salary <= {filterOptions.SalaryRange?.max}";
+                }
+                else if (filterOptions?.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is null)
+                {
+                    sqlQuery += $" AND Salary >= {filterOptions.SalaryRange?.min}";
+                }
+
+                if (filterOptions?.Company?.Length > 0)
+                {
+                    string companyFilter = string.Join(" OR ", filterOptions.Company.Select(company => $"company = '{company}'"));
+                    sqlQuery += companyFilter;
+                }
             }
 
-            if (filterOptions.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is not null)
-            {
-                sqlQuery += $" AND Salary BETWEEN {filterOptions.SalaryRange?.min} AND {filterOptions.SalaryRange?.max}";
-            }
-            else if (filterOptions.SalaryRange?.min is null && filterOptions.SalaryRange?.max is not null)
-            {
-                sqlQuery += $" AND Salary <= {filterOptions.SalaryRange?.max}";
-            }
-            else if (filterOptions.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is null)
-            {
-                sqlQuery += $" AND Salary >= {filterOptions.SalaryRange?.min}";
-            }
 
-            if (filterOptions.Company?.Length > 0)
-            {
-                string companyFilter = string.Join(" OR ", filterOptions.Company.Select(company => $"company = '{company}'"));
-                sqlQuery += companyFilter;
-            }
-
-            if(searchTerm is not null)
+            if (searchTerm is not null || !string.IsNullOrEmpty(searchTerm))
             {
                 string searchFilter = SearchTermSqlBuilder(searchTerm);
-                sqlQuery += $" OR ({searchFilter})";
+                sqlQuery += $" AND ({searchFilter})";
             }
 
             return sqlQuery;
@@ -76,7 +80,8 @@ namespace JobSeaAPI.Services
         {
             string[] words = searchTerm.Split(' ');
             string searchTermFilter = string.Join(" OR ", words.Select(term =>
-                $"Company like '%{term}%' " + $"  OR JobTitle like '%{term}%'" + $"  OR State like '%{term}%'" + $"  OR City like '%{term}%'" + $"  OR Comments like '%{term}%'" + $"  OR M.Name like '%{term}%'" + $"  OR S.Name like '%{term}%'" + $"  OR U.Notes like '%{term}%'" + $""
+                $"Company like '%{term}%' " + $"  OR JobTitle like '%{term}%'" + $"  OR State like '%{term}%'" + $"  OR City like '%{term}%'" + $"  OR Comments like '%{term}%'" + $"  OR M.Name like '%{term}%'" + $"  OR S.StatusName like '%{term}%'" + $"  OR U.Notes like '%{term}%'" + $"  OR A.JobDetails like '%{term}%'" +
+                $"  OR EXISTS (SELECT TOP 1 1 FROM Updates U2 WHERE U2.ApplicationId = A.ApplicationId AND U2.Notes like '%{term}%')"
                 ));
 
 

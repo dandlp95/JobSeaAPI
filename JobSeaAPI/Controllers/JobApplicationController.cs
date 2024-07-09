@@ -45,14 +45,14 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
 
-        public ActionResult<APIResponse> GetApplications(int userId)
+        public ActionResult<APIResponse> GetApplications(int userId, [FromQuery]string? search)
         {
             try
             {
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if(actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null, null);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null, search);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
                 _response.Result = applicationsDTO;
                 _response.Errors = null;
@@ -65,6 +65,40 @@ namespace JobSeaAPI.Controllers
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
             catch(Exception ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+        }
+
+        [HttpPost("users/{userId}/applications/search")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string? search, [FromBody] FilterOptionsDTO? filterOptions, int userId)
+        {
+            try
+            {
+                Claim? userIdClaim = User.FindFirst("userId");
+                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, userId, _response);
+
+                if (actionResult is not null) return actionResult;
+
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions, search);
+                List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
+
+                _response.Result = applicationsDTO;
+                _response.Errors = null;
+                _response.StatusCode = HttpStatusCode.OK;
+                _response.IsSuccess = true;
+                return Ok(_response);
+
+            }
+            catch (JobSeaException ex)
+            {
+                return _exceptionHandler.returnExceptionResponse(ex, _response);
+            }
+            catch (Exception ex)
             {
                 return _exceptionHandler.returnExceptionResponse(ex, _response);
             }
@@ -226,40 +260,6 @@ namespace JobSeaAPI.Controllers
                 _response.StatusCode = HttpStatusCode.OK;
             }
             return Ok(_response);
-        }
-
-        [HttpPost("users/{userId}/applications/search")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string? searchTerm, [FromBody] FilterOptionsDTO? filterOptions, int userId)
-        {
-            try
-            {
-                Claim? userIdClaim = User.FindFirst("userId");
-                ActionResult actionResult = _tokenService.tokenValidationResponseAction(userIdClaim, userId, _response);
-
-                if (actionResult is not null) return actionResult;
-
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions, searchTerm);
-                List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
-
-                _response.Result = applicationsDTO;
-                _response.Errors = null;
-                _response.StatusCode = HttpStatusCode.OK;
-                _response.IsSuccess = true;
-                return Ok(_response);
-
-            }
-            catch(JobSeaException ex)
-            {
-                return _exceptionHandler.returnExceptionResponse(ex, _response);
-            }
-            catch (Exception ex)
-            {
-                return _exceptionHandler.returnExceptionResponse(ex, _response);
-            }
         }
     }
 }
