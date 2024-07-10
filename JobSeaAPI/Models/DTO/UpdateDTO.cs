@@ -11,7 +11,7 @@ namespace JobSeaAPI.Models.DTO
         [Column(TypeName = "date")]
         public DateTime? EventDate { get; set; }
         public TimeSpan? EventTime { get; set; }
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
         // Having the Status here is helpful so client doesn't have to make another call for that information.
         public Status? Status { get; set; }
         public int ApplicationId { get; set; }

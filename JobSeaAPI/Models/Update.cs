@@ -13,7 +13,7 @@ namespace JobSeaAPI.Models
         public DateTime? EventDate { get; set; }
         public TimeSpan? EventTime { get; set; }
         [Required]
-        public string Notes { get; set; }  
+        public string? Notes { get; set; }  
         [Required]
         public int StatusId { get; set; }
         [Required]
