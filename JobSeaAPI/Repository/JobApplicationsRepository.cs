@@ -38,17 +38,17 @@ namespace JobSeaAPI.Repository
             return application;
         }
 
-        public List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions, string? searchTerm )
+        public List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions, string? searchTerm, int? skip, int? rows)
         {
             List<Application> results = new();
             if (filterOptions is null && searchTerm is null)
             {
                 Expression<Func<Application, bool>> filter = entity => entity.UserId == userId;
-                results = GetAllEntities(filter);
+                results = GetAllEntities(filter, skip, rows);
             }
             else 
             {
-                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions, searchTerm,userId);
+                string applicationsQuery = _sqlBuilder.BuildSql(filterOptions, searchTerm,userId, skip, rows);
                 results = _db.Applications.FromSqlRaw(applicationsQuery).ToList();
             }
 

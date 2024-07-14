@@ -45,14 +45,14 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
 
-        public ActionResult<APIResponse> GetApplications(int userId, [FromQuery]string? search)
+        public ActionResult<APIResponse> GetApplications(int userId, [FromQuery]string? search, [FromQuery] int? skip, [FromQuery] int? rows)
         {
             try
             {
                 ActionResult actionResult = _tokenService.tokenValidationResponseAction(User.FindFirst("userId"), userId, _response);
                 if(actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null, search);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, null, search, skip, rows);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
                 _response.Result = applicationsDTO;
                 _response.Errors = null;
@@ -75,7 +75,7 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string? search, [FromBody] FilterOptionsDTO? filterOptions, int userId)
+        public async Task<ActionResult<APIResponse>> CreateApplicationSearch([FromQuery] string? search, [FromQuery] int? skip, [FromQuery] int? rows, [FromBody] FilterOptionsDTO? filterOptions, int userId)
         {
             try
             {
@@ -84,7 +84,7 @@ namespace JobSeaAPI.Controllers
 
                 if (actionResult is not null) return actionResult;
 
-                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions, search);
+                List<Application> applications = _applicationsRepo.GetAllApplications(userId, filterOptions, search, skip, rows);
                 List<ApplicationDTO> applicationsDTO = _mapper.Map<List<ApplicationDTO>>(applications);
 
                 _response.Result = applicationsDTO;

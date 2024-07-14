@@ -30,11 +30,16 @@ namespace JobSeaAPI.Repository
             dbSet = _db.Set<T>();
         }
 
-        protected List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null)
+        protected List<T> GetAllEntities(Expression<Func<T, bool>>? filter = null, int? skip = null, int? rows = null)
         {
             IQueryable<T> query = dbSet;
             if (filter is not null) query = query.Where(filter);
             
+            if (skip is not null && rows is not null)
+            {
+                query.Skip((int)skip).Take((int)rows);
+            }
+
             return query.ToList();
         }
 

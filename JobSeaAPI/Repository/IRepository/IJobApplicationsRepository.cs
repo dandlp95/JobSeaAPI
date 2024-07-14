@@ -10,6 +10,6 @@ namespace JobSeaAPI.Repository.IRepository
         Task<Application> UpdateApplication(UpdateApplicationDTO application, int applicationId, int userId, bool updateAllFields = false);
         Task<Application> GetApplication(string sqlQuery);
         Application GetApplication(int applicationId, int userId);
-        List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions, string? searchTerm);
+        List<Application> GetAllApplications(int userId, FilterOptionsDTO? filterOptions, string? searchTerm, int? skip, int? rows);
     }
 }

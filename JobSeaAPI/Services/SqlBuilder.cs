@@ -6,7 +6,7 @@ namespace JobSeaAPI.Services
     {
         public SqlBuilder() { }
 
-        public string BuildSql(FilterOptionsDTO? filterOptions, string? searchTerm, int userId)
+        public string BuildSql(FilterOptionsDTO? filterOptions, string? searchTerm, int userId, int? skip, int? rows)
         {
             string sqlQuery = @$"
                 SELECT A.ApplicationId, A.Company, A.JobTitle, A.Salary, A.City, A.State, A.Link, A.JobDetails, A.Comments, A.Created,
@@ -22,12 +22,12 @@ namespace JobSeaAPI.Services
                     LEFT JOIN Modalities M ON M.ModalityId = A.ModalityId
                 WHERE UserId = {userId}
                 ";
-
+            // FilterOptions should be passed as null in frontend to avoid checking each property.
             if (filterOptions is not null)
             {
                 if (filterOptions?.States?.Length > 0)
                 {
-                    string statesFilter = string.Join(" OR ", filterOptions.States.Select(state => $"state = '{state}')"));
+                    string statesFilter = string.Join(" OR ", filterOptions.States.Select(state => $"state = '{state}'"));
                     sqlQuery += $" AND ({statesFilter})";
                 }
                 if (filterOptions?.Cities?.Length > 0)
@@ -43,14 +43,14 @@ namespace JobSeaAPI.Services
                 if (filterOptions?.StatusId?.Length > 0)
                 {
                     string statusFilter = string.Join(" OR ", filterOptions.StatusId.Select(statusId => $"S.StatusId = {statusId}"));
-                    sqlQuery += $" AND {statusFilter}";
+                    sqlQuery += $" AND ({statusFilter})";
                 }
 
                 if (filterOptions?.SalaryRange?.min is not null && filterOptions.SalaryRange?.max is not null)
                 {
                     sqlQuery += $" AND Salary BETWEEN {filterOptions.SalaryRange?.min} AND {filterOptions.SalaryRange?.max}";
                 }
-                else if (filterOptions?.SalaryRange?.min is null && filterOptions.SalaryRange?.max is not null)
+                else if (filterOptions?.SalaryRange?.min is null && filterOptions?.SalaryRange?.max is not null)
                 {
                     sqlQuery += $" AND Salary <= {filterOptions.SalaryRange?.max}";
                 }
@@ -67,10 +67,15 @@ namespace JobSeaAPI.Services
             }
 
 
-            if (searchTerm is not null || !string.IsNullOrEmpty(searchTerm))
+            if (!string.IsNullOrEmpty(searchTerm))
             {
                 string searchFilter = SearchTermSqlBuilder(searchTerm);
                 sqlQuery += $" AND ({searchFilter})";
+            }
+
+            if (skip is not null && rows is not null)
+            {
+                sqlQuery += " ORDER BY A.ApplicationId OFFSET " + skip + " ROWS FETCH NEXT " + rows + " ROWS ONLY";
             }
 
             return sqlQuery;
