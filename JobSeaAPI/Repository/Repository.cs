@@ -37,7 +37,7 @@ namespace JobSeaAPI.Repository
             
             if (skip is not null && rows is not null)
             {
-                query.Skip((int)skip).Take((int)rows);
+                query = query.Skip((int)skip).Take((int)rows);
             }
 
             return query.ToList();

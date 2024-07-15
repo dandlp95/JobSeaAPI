@@ -12,12 +12,12 @@ namespace JobSeaAPI.Services
                 SELECT A.ApplicationId, A.Company, A.JobTitle, A.Salary, A.City, A.State, A.Link, A.JobDetails, A.Comments, A.Created,
                     A.LastUpdated, A.UserId, A.ModalityId, S.StatusName
                 FROM Applications A
-                    JOIN (
+                    LEFT JOIN(
                         SELECT U.ApplicationId, MAX(UpdateId) AS MaxId
                         FROM Updates U
                         GROUP BY U.ApplicationId
                     ) latest_u ON A.ApplicationId = latest_u.ApplicationId
-                    JOIN Updates U ON latest_u.MaxId = U.UpdateId
+                    LEFT JOIN Updates U ON latest_u.MaxId = U.UpdateId
                     LEFT JOIN Status S ON S.StatusId = U.StatusId
                     LEFT JOIN Modalities M ON M.ModalityId = A.ModalityId
                 WHERE UserId = {userId}
@@ -35,6 +35,12 @@ namespace JobSeaAPI.Services
                     string citiesFilter = string.Join(" OR ", filterOptions.Cities.Select(city => $"city = '{city}'"));
                     sqlQuery += $" AND ({citiesFilter})";
                 }
+                if (filterOptions?.Company?.Length > 0)
+                {
+                    string companyFilter = string.Join(" OR ", filterOptions.Company.Select(company => $"company = '{company}'"));
+                    sqlQuery += $" AND ({companyFilter})";
+                }
+
                 if (filterOptions?.Modalities?.Length > 0)
                 {
                     string modalitiesFilter = string.Join(" OR ", filterOptions.Modalities.Select(modalityId => $"M.ModalityId = {modalityId}"));
@@ -59,11 +65,7 @@ namespace JobSeaAPI.Services
                     sqlQuery += $" AND Salary >= {filterOptions.SalaryRange?.min}";
                 }
 
-                if (filterOptions?.Company?.Length > 0)
-                {
-                    string companyFilter = string.Join(" OR ", filterOptions.Company.Select(company => $"company = '{company}'"));
-                    sqlQuery += companyFilter;
-                }
+
             }
 
 

@@ -45,7 +45,7 @@ namespace JobSeaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [Authorize(Policy = "User")]
 
-        public ActionResult<APIResponse> GetApplications(int userId, [FromQuery]string? search, [FromQuery] int? skip, [FromQuery] int? rows)
+        public async Task<ActionResult<APIResponse>> GetApplications(int userId, [FromQuery]string? search, [FromQuery] int? skip, [FromQuery] int? rows)
         {
             try
             {
