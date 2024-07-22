@@ -33,10 +33,22 @@ builder.Services.AddCors(options =>
                       });
 });
 
-builder.Services.AddDbContext<ApplicationDbContext>(option =>
+if (builder.Environment.IsDevelopment()) 
 {
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
-});
+    builder.Services.AddDbContext<ApplicationDbContext>(option =>
+    {
+        option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
+    });
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")));
+}
+
+
+
+
 builder.Services.AddSingleton<ILoggerCustom, LoggerCustom>();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
