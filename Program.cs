@@ -41,11 +41,6 @@ if (builder.Environment.IsDevelopment())
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
     });
 
-    // Configure Kestrel to listen on port 8080
-    builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ListenAnyIP(8080); // Set the listening port to 8080
-    });
 
 }
 else
@@ -54,7 +49,11 @@ else
         options.UseSqlServer(builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")));
 }
 
-
+// Configure Kestrel to listen on port 8080
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080); // Set the listening port to 8080
+});
 
 
 builder.Services.AddSingleton<ILoggerCustom, LoggerCustom>();
