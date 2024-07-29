@@ -141,6 +141,21 @@ app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
+// Middleware to handle 404 Not Found responses
+app.Use(async (context, next) =>
+{
+    await next(); // Process the request and response
+
+    // Check if the response status code is 404
+    if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+    {
+        // Set the content type to JSON
+        context.Response.ContentType = "application/json";
+        // Write a custom 404 response
+        await context.Response.WriteAsync("{\"message\": \"Resource not found.\"}");
+    }
+});
+
 app.MapControllers();
 
 app.Run();
