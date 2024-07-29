@@ -12,6 +12,7 @@ using System.Text;
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
+
 string secretKey = builder.Configuration.GetValue<string>("AppSettings:SecretKey") ?? throw new Exception("Unable to access key to connect to the database.");
 string ApiUrl = builder.Configuration.GetValue<string>("AppSettings:ApiUrl"); 
 string clientUrl = builder.Configuration.GetValue<string>("AppSettings:clientUrl");
@@ -39,6 +40,13 @@ if (builder.Environment.IsDevelopment())
     {
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
     });
+
+    // Configure Kestrel to listen on port 8080
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenAnyIP(8080); // Set the listening port to 8080
+    });
+
 }
 else
 {
