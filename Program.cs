@@ -12,19 +12,22 @@ using System.Text;
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
-//// Get the port from the environment variable, default to 8080 if not set
-//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-//var portNumber = int.TryParse(port, out var result) ? result : 8080;
+string secretKey = "";
+string ApiUrl = "";
+string clientUrl = "";
 
-//// Configure Kestrel to listen on the specified port
-//builder.WebHost.ConfigureKestrel(options =>
-//{
-//    options.ListenAnyIP(portNumber);
-//});
-
-string secretKey = builder.Configuration.GetValue<string>("AppSettings:SecretKey") ?? throw new Exception("Unable to access key to connect to the database.");
-string ApiUrl = builder.Configuration.GetValue<string>("AppSettings:ApiUrl"); 
-string clientUrl = builder.Configuration.GetValue<string>("AppSettings:clientUrl");
+if (builder.Environment.IsDevelopment())
+{
+    secretKey = builder.Configuration.GetValue<string>("AppSettings:SecretKey") ?? throw new Exception("Unable to access key to connect to the database.");
+    ApiUrl = builder.Configuration.GetValue<string>("AppSettings:ApiUrl") ?? throw new Exception("Unable to feth Api Url value"); 
+    clientUrl = builder.Configuration.GetValue<string>("AppSettings:clientUrl") ?? throw new Exception("Unable to access client url variable");
+}
+else
+{
+    secretKey = builder.Configuration.GetValue<string>("SECRET_KEY") ?? throw new Exception("Unable to access key to connect to the database.");
+    ApiUrl = builder.Configuration.GetValue<string>("API_URL") ?? throw new Exception("Unable to feth Api Url value"); 
+    clientUrl = builder.Configuration.GetValue<string>("CLIENT_URL") ?? throw new Exception("Unable to access client url variable");
+}
 
 var TokenValidationParameters = new TokenValidationParameters
 {
