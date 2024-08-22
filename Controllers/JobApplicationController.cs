@@ -240,7 +240,7 @@ namespace JobSeaAPI.Controllers
                 List<Country> countries = _locationRepository.GetCountries();
                 _response.Result = countries;
                 _response.IsSuccess = true;
-                _response.Errors = new List<string>();
+                _response.Errors = [];
                 _response.StatusCode = HttpStatusCode.OK;
             }
             else if (state is null && country is not null)
@@ -248,7 +248,7 @@ namespace JobSeaAPI.Controllers
                 List<State> states = _locationRepository.GetStates((int)country);
                 _response.Result = states;
                 _response.IsSuccess = true;
-                _response.Errors = new List<string>();
+                _response.Errors = [];
                 _response.StatusCode = HttpStatusCode.OK;
             }
             else if (state is not null)
@@ -256,7 +256,7 @@ namespace JobSeaAPI.Controllers
                 List<City> cities = _locationRepository.GetCities((int)state);
                 _response.Result = cities;
                 _response.IsSuccess = true;
-                _response.Errors = new List<string>();
+                _response.Errors = [];
                 _response.StatusCode = HttpStatusCode.OK;
             }
             return Ok(_response);
