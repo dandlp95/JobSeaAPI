@@ -237,6 +237,10 @@ namespace JobSeaAPI.Controllers
         [EnableCors("_myAllowSpecificOrigins")]
         public async Task<ActionResult<APIResponse>> GetLocation([FromQuery] int? country, [FromQuery] int? state)
         {
+            Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+            Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+
             if (country is null && state is null)
             {  
                 List<Country> countries = _locationRepository.GetCountries();
